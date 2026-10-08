@@ -1,0 +1,40 @@
+/*
+ * 系统设置窗口。
+ */
+/* ---------- 设置窗口 ---------- */
+#settingsModal .modal-content { max-width: 1100px; }
+.set-wrap { display: flex; gap: 18px; min-height: 60vh; }
+.set-nav { width: 170px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+.set-nav button { text-align: left; padding: 9px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--fg); cursor: pointer; font-size: 14px; }
+.set-nav button:hover { background: var(--hover); }
+.set-nav button.active { background: var(--accent); color: var(--accent-fg); }
+.set-body { flex: 1; min-width: 0; max-height: 68vh; overflow: auto; padding-right: 6px; }
+.set-sec h3 { margin: 4px 0 4px; font-size: 16px; }
+.set-sec .set-desc { font-size: 12.5px; color: var(--fg-dim); margin-bottom: 12px; line-height: 1.6; }
+.set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px 18px; }
+.set-item { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); }
+.set-item.wide { grid-column: 1 / -1; }
+.set-item.changed { border-color: var(--accent); }
+.set-item label.t { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.set-item .k { font-family: Consolas, monospace; font-size: 11px; color: var(--fg-faint); font-weight: 400; }
+.set-item input[type=text], .set-item input[type=number], .set-item select, .set-item textarea { padding: 7px 9px; border: 1px solid var(--input-border); border-radius: 6px;
+  background: var(--card-bg); color: var(--fg); font-size: 13.5px; box-sizing: border-box; width: 100%; }
+.set-item textarea { font-family: Consolas, "Cascadia Mono", monospace; min-height: 58px; }
+.set-item .h { font-size: 12px; color: var(--fg-dim); line-height: 1.5; }
+.set-item .d { font-size: 11.5px; color: var(--fg-faint); }
+.set-row { display: flex; gap: 8px; align-items: center; }
+.set-row input[type=number] { width: 120px; }
+.set-badge { font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 4px; background: var(--warn-bg); color: var(--warn-fg); }
+.set-badge.live { background: var(--good-bg); color: var(--good-fg); }
+.set-foot { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--card-border); flex-wrap: wrap; }
+.set-msg { font-size: 13px; margin-right: auto; }
+.set-switch { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+.set-switch input { opacity: 0; width: 0; height: 0; }
+.set-switch span { position: absolute; inset: 0; border-radius: 21px; background: var(--track); transition: .2s; cursor: pointer; }
+.set-switch span::before { content: ""; position: absolute; width: 15px; height: 15px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.set-switch input:checked + span { background: var(--accent); }
+.set-switch input:checked + span::before { transform: translateX(17px); }
+.set-fixed { font-size: 13px; line-height: 1.8; }
+.set-fixed td { padding: 4px 10px 4px 0; vertical-align: top; border-bottom: 1px dashed var(--card-border); }
+.set-links { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 16px; }
+@media (max-width: 760px) { .set-wrap { flex-direction: column; } .set-nav { width: auto; flex-direction: row; flex-wrap: wrap; } }

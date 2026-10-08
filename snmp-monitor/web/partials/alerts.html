@@ -1,0 +1,75 @@
+<div class="modal-overlay" id="alertModal">
+  <div class="modal-content wide" id="alertBox">
+    <div class="modal-header ac-head">
+      <div>
+        <h2 id="galertTitle" style="margin:0;font-size:18px;">🚨 统一事件中心</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="acSub">告警与设备 Syslog 汇总 · 历史处理记录 · 统计分析</div>
+      </div>
+      <span class="segb ac-tabs" id="acTabs">
+        <button data-t="now">🔴 当前告警 <b id="acNowN"></b></button><button data-t="syslog" data-view="flows" data-perm="flows">📝 Syslog <b id="acSyslogN"></b></button><button data-t="hist">📜 历史记录</button><button data-t="stat">📊 统计分析</button>
+      </span>
+      <div class="tb"><span id="acFs"></span><button class="modal-close" onclick="closeAlertTable()">&times;</button></div>
+    </div>
+    <div class="modal-body fill ac-body">
+      <!-- 当前告警 -->
+      <div class="ac-pane" id="acNow">
+        <div class="tb">
+          <input type="text" class="search-box" id="galertSearch" placeholder="搜索设备 / 端口 / 告警内容…" autocomplete="off">
+          <div class="ms" id="galertDeviceFilter" data-all="全部设备" data-label="设备" data-change="renderGlobalAlertTable"></div>
+          <div class="ms" id="galertLevelFilter" data-all="全部级别" data-label="级别" data-change="renderGlobalAlertTable"></div>
+          <div class="ms" id="galertCategoryFilter" data-all="全部类别" data-label="类别" data-change="renderGlobalAlertTable"></div>
+          <div class="ms" id="galertStatusFilter" data-all="全部状态" data-label="状态" data-change="renderGlobalAlertTable"></div>
+          <button class="btn sm" onclick="acNowClear()">✕ 清除筛选</button>
+          <span class="grow"></span>
+          <span class="tb-label">分组</span>
+          <select id="acNowGroup"><option value="">不分组</option><option value="device">按设备</option><option value="category">按类别</option><option value="level">按级别</option><option value="state">按状态</option></select>
+          <button class="btn sm" id="acAckAll" onclick="acAckFiltered()" title="把当前筛选出来的未处理告警全部确认">✔ 全部确认</button>
+          <button class="btn sm" onclick="openAlertTable(true)" title="重新拉取">⟳</button>
+        </div>
+        <div class="gmac-stat" id="acNowStat"></div>
+        <div id="galertTable" class="vt-fill"></div>
+      </div>
+
+      <!-- 跨设备 Syslog 汇总，与告警在同一个事件中心内查看 -->
+      <div class="ac-pane" id="acSyslog" style="display:none;">
+        <div class="tb">
+          <input type="text" class="search-box" id="acSyslogSearch" placeholder="搜索设备 / IP / 日志内容…" autocomplete="off">
+          <div class="ms" id="acSyslogDevice" data-all="全部设备" data-label="设备" data-change="acSyslogRender"></div>
+          <select class="sel" id="acSyslogSeverity" title="按 Syslog 严重级别筛选">
+            <option value="">全部级别</option><option value="0">紧急</option><option value="1">警报</option><option value="2">严重</option><option value="3">错误</option><option value="4">警告</option><option value="5">通知</option><option value="6">信息</option><option value="7">调试</option>
+          </select>
+          <button class="btn sm" onclick="acSyslogClear()">✕ 清除筛选</button>
+          <span class="grow"></span>
+          <button class="btn sm" onclick="acSyslogLoad(true)" title="重新拉取">⟳ 刷新</button>
+        </div>
+        <div class="gmac-stat" id="acSyslogStat"></div>
+        <div id="acSyslogTable" class="vt-fill"></div>
+        <div class="muted" id="acSyslogHint" style="font-size:11px;padding:6px 2px;"></div>
+      </div>
+
+      <!-- 历史 / 统计共用的筛选条 -->
+      <div class="ac-pane" id="acHist">
+        <div class="tb">
+          <span class="segb" id="acRange">
+            <button data-r="today">今天</button><button data-r="24h">24 小时</button><button data-r="7d">7 天</button><button data-r="30d">30 天</button><button data-r="90d">90 天</button><button data-r="all">全部</button><button data-r="custom">自定义</button>
+          </span>
+          <span id="acCustom" class="tb" style="display:none;"><input type="date" id="acFrom" class="sel"> <span class="muted">至</span> <input type="date" id="acTo" class="sel"></span>
+          <input type="text" class="search-box" id="acHQ" placeholder="搜索设备 / 对象 / 内容 / 处理人…" autocomplete="off" style="width:200px;">
+          <div class="ms" id="acHDev" data-all="全部设备" data-label="设备" data-change="acHistReload"></div>
+          <div class="ms" id="acHLevel" data-all="全部级别" data-label="级别" data-change="acHistReload"></div>
+          <div class="ms" id="acHCat" data-all="全部类别" data-label="类别" data-change="acHistReload"></div>
+          <div class="ms" id="acHStatus" data-all="全部状态" data-label="状态" data-change="acHistReload"></div>
+          <button class="btn sm" onclick="acHistClear()">✕</button>
+          <span class="grow"></span>
+          <span class="ac-hist-only tb"><span class="tb-label">分组</span>
+            <select id="acHistGroup"><option value="">不分组</option><option value="day">按日期</option><option value="device">按设备</option><option value="category">按类别</option><option value="alert">按告警对象</option></select></span>
+          <button class="btn sm" onclick="acHistExport()" title="按当前筛选导出全部记录">📥 导出 CSV</button>
+        </div>
+        <div class="gmac-stat" id="acHistStat"></div>
+        <div id="acHistTable" class="vt-fill ac-hist-only"></div>
+        <div id="acStatBox" class="ac-stat"></div>
+      </div>
+      <div class="drawer" id="acDrawer"></div>
+    </div>
+  </div>
+</div>

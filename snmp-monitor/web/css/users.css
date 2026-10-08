@@ -1,0 +1,40 @@
+/*
+ * 账号权限。
+ */
+.hbtn.noperm { opacity: .45; cursor: not-allowed; }
+.usr-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .usr-wrap { grid-template-columns: 1fr; } }
+.usr-table td, .usr-table th { vertical-align: middle; }
+.usr-table tr.cur td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.usr-chip { display: inline-block; font-size: 11.5px; padding: 1px 7px; border-radius: 9px; margin: 1px 3px 1px 0; background: var(--hover); border: 1px solid var(--card-border); color: var(--fg); white-space: nowrap; }
+.usr-chip.admin { background: color-mix(in srgb, #f59e0b 20%, transparent); border-color: #f59e0b; }
+.usr-chip.off { color: var(--bad); border-color: var(--bad); }
+.usr-form { border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; background: var(--card-bg); position: sticky; top: 0; }
+.usr-form h4 { margin: 0 0 10px; font-size: 15px; }
+.usr-form label.t { display: block; font-size: 12px; color: var(--fg-dim); margin: 10px 0 4px; }
+.usr-form input[type=text], .usr-form input[type=password] { width: 100%; box-sizing: border-box; padding: 7px 9px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--fg); font-size: 13px; }
+.usr-perms { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10px; }
+.usr-perm { display: flex; gap: 8px; align-items: flex-start; padding: 6px 4px; border-bottom: 1px dashed var(--card-border); font-size: 13px; cursor: pointer; }
+.usr-perm small { display: block; color: var(--fg-dim); font-size: 11.5px; line-height: 1.4; }
+.usr-perm input { margin-top: 3px; }
+.usr-presets { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
+.usr-presets button { font-size: 12px; padding: 2px 8px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--fg); cursor: pointer; }
+.usr-roles { display: flex; gap: 8px; }
+.usr-roles label { flex: 1; border: 1px solid var(--card-border); border-radius: 8px; padding: 7px 9px; font-size: 13px; cursor: pointer; }
+.usr-roles label.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.usr-roles small { display: block; color: var(--fg-dim); font-size: 11.5px; }
+.ui-toast { position: fixed; left: 50%; top: 18px; transform: translate(-50%, -20px); opacity: 0; z-index: 5000; padding: 9px 16px; border-radius: 8px; font-size: 13.5px;
+  background: #1f2937; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.25); transition: opacity .25s, transform .25s; pointer-events: none; max-width: 80vw; }
+.ui-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.ui-toast.err { background: #b91c1c; } .ui-toast.ok { background: #047857; }
+
+/* 游客访问关闭时的登录遮罩(登录框 z-index 1000, 盖在它上面) */
+.guest-lock { position: fixed; inset: 0; z-index: 990; background: var(--bg, #0f172a); display: flex; align-items: center; justify-content: center; }
+.guest-lock-box { text-align: center; color: var(--fg); background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 32px 40px; box-shadow: 0 20px 40px rgba(0,0,0,.25); }
+.guest-lock-box h2 { margin: 8px 0; }
+.guest-lock-box p { color: var(--fg-dim); margin: 0 0 16px; }
+.usr-guest { border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; background: var(--hover); }
+.usr-guest .views { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0; }
+.usr-guest .views label { font-size: 13px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.usr-guest .views label.off { opacity: .45; }
+.usr-guest .views input { width: auto; }

@@ -1,0 +1,20 @@
+<div class="modal-overlay" id="l2Modal">
+  <div class="modal-content wide" id="l2Box">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">🩺 二层体检</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">把全网每轮巡检的数据放在一起看: 广播风暴、环路(MAC 漂移 / 生成树震荡)、私接设备、ARP 欺骗、IP 冲突、端口抖动。都是自动推断, 每条都附证据和针对这台设备这个口的排查步骤(按厂商给命令)。</div>
+      </div>
+      <div class="tb"><span id="l2Fs"></span><button class="btn sm" onclick="openL2Health(true)" title="重新拉取">⟳</button><button class="modal-close" onclick="closeL2Health()">&times;</button></div>
+    </div>
+    <div class="modal-body">
+      <div id="l2Summary" class="l2-summary"></div>
+      <div class="tb" style="margin:8px 0;">
+        <label style="font-size:13px;"><input type="checkbox" id="l2ShowInfo" onchange="renderL2Health()" style="width:auto;"> 显示提示级(info)</label>
+        <span class="grow"></span>
+        <span id="l2Stat" class="sub2" style="display:inline;"></span>
+      </div>
+      <div id="l2List" class="l2-list"><div class="empty">加载中…</div></div>
+    </div>
+  </div>
+</div>

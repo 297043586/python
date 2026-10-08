@@ -1,0 +1,33 @@
+/* 配置下发窗口 (web/js/push/push.js) */
+.push-form { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; margin-bottom: 12px; }
+.push-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--fg-dim); }
+.push-form input, .push-form select, .push-form textarea { font-size: 13px; }
+.push-form textarea { width: 100%; font-family: ui-monospace, Consolas, monospace; }
+.push-warn { flex: 1 1 100%; font-size: 12.5px; color: var(--warn-fg); }
+.push-warn:empty { display: none; }
+.push-cols { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.4fr); gap: 14px; min-height: 360px; }
+.push-devs, .push-right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.push-devlist, .push-plans { flex: 1; overflow: auto; max-height: 58vh; border: 1px solid var(--card-border); border-radius: 8px; padding: 6px; background: var(--card-bg); }
+.push-dev { padding: 6px 8px; border-radius: 6px; border: 1px solid transparent; }
+.push-dev + .push-dev { margin-top: 4px; }
+.push-dev.on { border-color: var(--accent); background: var(--info-bg); }
+.push-dev.nocred { opacity: .6; }
+.push-dev > .sub2 { display: block; font-size: 11.5px; margin-left: 22px; color: var(--fg-faint); }
+.push-dev > label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+.push-dev > label input { width: auto; }
+.push-ports { margin: 6px 0 2px 22px; }
+.push-ports .tb { gap: 6px; margin-bottom: 4px; }
+.push-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.push-chips .chip { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); cursor: pointer; white-space: nowrap; }
+.push-chips .chip input { width: auto; margin: 0; }
+.push-chips .chip.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.push-chips .chip.down { opacity: .55; }
+.push-plan { padding: 8px; border-bottom: 1px dashed var(--card-border); }
+.push-plan:last-child { border-bottom: 0; }
+.push-plan .hd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.push-plan textarea { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; line-height: 1.45; }
+.push-note { font-size: 12px; color: var(--warn-fg); margin-bottom: 4px; }
+.push-err { font-size: 12.5px; color: var(--bad); margin-bottom: 4px; white-space: pre-wrap; }
+.push-log { max-height: 320px; overflow: auto; font-size: 12px; background: var(--log-bg, #0b1220); color: var(--log-fg, #cbd5e1); padding: 8px; border-radius: 6px; white-space: pre-wrap; word-break: break-all; }
+.push-plan details summary { cursor: pointer; font-size: 12.5px; color: var(--fg-dim); }
+@media (max-width: 820px) { .push-cols { grid-template-columns: 1fr; } }

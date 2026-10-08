@@ -1,0 +1,35 @@
+/* 🩺 二层体检 (web/js/l2health/l2health.js) */
+.l2-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.l2-card { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); cursor: pointer; text-align: left; color: var(--fg); font-size: 13px; }
+.l2-card .ic { font-size: 18px; }
+.l2-card .nm { flex: 1; }
+.l2-card b { font-size: 16px; }
+.l2-card.lv-ok b { color: var(--good); }
+.l2-card.lv-info b { color: var(--fg-dim); }
+.l2-card.lv-warning { border-color: var(--warn); }
+.l2-card.lv-warning b { color: var(--warn-fg); }
+.l2-card.lv-critical { border-color: var(--bad); background: var(--bad-bg); }
+.l2-card.lv-critical b { color: var(--bad-fg); }
+.l2-card.on { outline: 2px solid var(--accent); }
+.l2-list { display: flex; flex-direction: column; gap: 6px; max-height: 52vh; overflow: auto; }
+.l2-item { border: 1px solid var(--card-border); border-left-width: 4px; border-radius: 6px; padding: 8px 10px; background: var(--card-bg); }
+.l2-item.lv-critical { border-left-color: var(--bad); }
+.l2-item.lv-warning { border-left-color: var(--warn); }
+.l2-item.lv-info { border-left-color: var(--fg-faint); }
+.l2-item .hd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13.5px; }
+.l2-item .dt { font-size: 12.5px; color: var(--fg-dim); margin-top: 4px; }
+.l2-item details { margin-top: 4px; font-size: 12.5px; }
+.l2-item details ul { margin: 4px 0 0 18px; padding: 0; }
+.l2-item .go { margin-top: 4px; font-size: 12.5px; }
+.l2-guide { margin-top: 12px; border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 12px; background: var(--card-bg); }
+.l2-guide summary { cursor: pointer; font-weight: 600; }
+.l2-g h4 { margin: 12px 0 6px; }
+.l2-g ol { margin: 0 0 8px 18px; padding: 0; font-size: 13px; line-height: 1.7; }
+.l2-cmd { width: 100%; font-size: 12.5px; margin: 4px 0 8px; border-collapse: collapse; }
+.l2-cmd td { padding: 4px 8px; border-top: 1px solid var(--card-border); vertical-align: top; }
+.l2-cmd td:first-child { white-space: nowrap; font-weight: 600; width: 60px; }
+
+.l2-steps { margin-top: 6px; }
+.l2-steps summary { cursor: pointer; font-size: 12.5px; color: var(--fg-dim); }
+.l2-steps ol { margin: 6px 0 2px; padding-left: 22px; font-size: 13px; line-height: 1.7; }
+.l2-steps code.l2-cmd-c { background: var(--hover); border: 1px solid var(--card-border); border-radius: 4px; padding: 1px 6px; font-size: 12px; user-select: all; }

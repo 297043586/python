@@ -1,0 +1,82 @@
+{
+  "bind_address": "0.0.0.0",
+  "web_port": 8080,
+  "data_dir": "data",
+  "admin_user": "admin",
+  "session_hours": 12,
+
+  "snmp_port": 161,
+  "check_interval_seconds": 60,
+  "timeout_seconds": 5,
+  "retries": 2,
+  "max_concurrency": 30,
+  "walk_parallel": 3,
+  "max_repetitions": 20,
+  "heavy_every_n_rounds": 1,
+
+  "collectors": {
+    "syslog_port": 0,
+    "netflow_port": 0,
+    "sflow_port": 0,
+    "flow_l7": true
+  },
+
+  "alerts": {
+    "cpu": { "disabled": false, "threshold": 80 },
+    "mem": { "disabled": false, "threshold": 85 },
+    "optical": { "disabled": false, "threshold": -25 },
+    "port_error": { "disabled": false, "threshold": 10 },
+    "bandwidth": { "disabled": false, "threshold": 90 }
+  },
+
+  "uplink_mac_threshold": 8,
+  "trend_retention_hours": 24,
+  "alert_history_days": 180,
+  "vlan_community_format": "",
+  "webhook_url": "",
+
+  "ui": {
+    "site_title": "局域网智能监控大屏",
+    "default_theme": "",
+    "page_refresh_seconds": 30,
+    "bigscreen_title": "网络运行态势总览",
+    "bigscreen_style": "tech",
+    "bigscreen_center": "map",
+    "bigscreen_refresh_seconds": 15,
+    "bigscreen_carousel_seconds": 30,
+    "bigscreen_scroll_speed": 30,
+    "bigscreen_risk_count": 8,
+    "bigscreen_hot_count": 6,
+    "bigscreen_animations": true,
+    "topo_refresh_seconds": 30,
+    "topo3d_particles": true,
+    "topo3d_auto_rotate": true,
+    "rack_refresh_seconds": 30,
+    "weak_optical_dbm": -20,
+    "busy_util_percent": 70
+  },
+
+  "backup_commands": {
+    "huawei": "screen-length 0 temporary\ndisplay current-configuration",
+    "h3c": "screen-length disable\ndisplay current-configuration",
+    "ruijie": "terminal length 0\nshow running-config",
+    "cisco": "terminal length 0\nshow running-config",
+    "generic": "terminal length 0\nshow running-config"
+  },
+
+  "devices": [
+    {
+      "ip": "10.1.1.1",
+      "community": "public",
+      "brand": "auto",
+      "note": "示例: 只在首次启动(设备库为空)时导入一次, 之后以页面上的设备管理为准",
+      "collect": {
+        "skip_optical": false,
+        "skip_lldp": false,
+        "skip_rates": false,
+        "skip_hosts": false,
+        "skip_extended": false
+      }
+    }
+  ]
+}

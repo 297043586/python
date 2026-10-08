@@ -1,0 +1,73 @@
+/*
+ * 主题色板: 所有颜色都走 CSS 变量, body 上的 theme-* 类切换一整套变量。
+ * 风格主题(style-*)在 styles.css 里。
+ */
+:root {
+  --bg: #f1f5f9; --fg: #1e293b; --fg-dim: #64748b; --fg-faint: #94a3b8;
+  --card-bg: #ffffff; --card-border: #e2e8f0; --header-grad-a: #1e293b; --header-grad-b: #0f172a;
+  --header-fg: #ffffff; --accent: #2563eb; --accent-fg: #ffffff;
+  --good: #10b981; --warn: #f59e0b; --bad: #ef4444; --info: #3b82f6; --purple: #8b5cf6;
+  --good-bg: #d1fae5; --good-fg: #065f46; --bad-bg: #fee2e2; --bad-fg: #991b1b;
+  --warn-bg: #fef3c7; --warn-fg: #92400e; --info-bg: #dbeafe; --info-fg: #1e40af;
+  --track: #e2e8f0; --hover: #f8fafc; --input-border: #cbd5e1; --log-bg: #0f172a; --log-fg: #38bdf8;
+  --shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+body.theme-dark {
+  --bg: #0f172a; --fg: #e2e8f0; --fg-dim: #94a3b8; --fg-faint: #64748b;
+  --card-bg: #1e293b; --card-border: #334155; --header-grad-a: #020617; --header-grad-b: #0f172a;
+  --header-fg: #e2e8f0; --accent: #3b82f6; --accent-fg: #ffffff;
+  --good-bg: #064e3b; --good-fg: #6ee7b7; --bad-bg: #450a0a; --bad-fg: #fca5a5;
+  --warn-bg: #451a03; --warn-fg: #fcd34d; --info-bg: #1e3a8a; --info-fg: #93c5fd;
+  --track: #334155; --hover: #263449; --input-border: #475569; --log-bg: #000000; --log-fg: #4ade80;
+  --shadow: 0 2px 12px rgba(0,0,0,.5);
+}
+body.theme-slate {
+  --bg: #1a1f2b; --fg: #dce3ee; --fg-dim: #9aa7bd; --fg-faint: #6b7891;
+  --card-bg: #232a3b; --card-border: #323b52; --header-grad-a: #10131c; --header-grad-b: #1a1f2b;
+  --header-fg: #dce3ee; --accent: #6366f1; --accent-fg: #ffffff;
+  --good-bg: #14332a; --good-fg: #7fe0bd; --bad-bg: #3a1a24; --bad-fg: #f299ab;
+  --warn-bg: #3a2b12; --warn-fg: #f0c67a; --info-bg: #1c2b4a; --info-fg: #9ab8f0;
+  --track: #323b52; --hover: #2a3247; --input-border: #3f4a63; --log-bg: #0a0d14; --log-fg: #8bd0f5;
+  --shadow: 0 2px 12px rgba(0,0,0,.45);
+}
+body.theme-paper {
+  --bg: #f7f4ec; --fg: #2b2620; --fg-dim: #71675a; --fg-faint: #a39a89;
+  --card-bg: #fffdf8; --card-border: #e6ddc9; --header-grad-a: #3f3627; --header-grad-b: #2b2620;
+  --header-fg: #f7f4ec; --accent: #a1651d; --accent-fg: #ffffff;
+  --good-bg: #e4efdc; --good-fg: #3f6b2c; --bad-bg: #f5e0da; --bad-fg: #97392a;
+  --warn-bg: #f6ead0; --warn-fg: #8a5a12; --info-bg: #e4e9f2; --info-fg: #34486f;
+  --track: #ece5d5; --hover: #f0ead9; --input-border: #d8cdb4; --log-bg: #2b2620; --log-fg: #e8d9b5;
+  --shadow: 0 2px 8px rgba(60,50,30,.12);
+}
+/* 北欧极地: 冷感蓝灰 + 霜蓝点缀, Nord 配色系, 长时间盯屏也不会太刺眼。 */
+body.theme-nord {
+  --bg: #2e3440; --fg: #eceff4; --fg-dim: #b7c0d1; --fg-faint: #7c88a0;
+  --card-bg: #3b4252; --card-border: #4c566a; --header-grad-a: #232830; --header-grad-b: #2e3440;
+  --header-fg: #eceff4; --accent: #88c0d0; --accent-fg: #1c232b;
+  --good-bg: #2b3b2f; --good-fg: #a3be8c; --bad-bg: #3d2830; --bad-fg: #bf616a;
+  --warn-bg: #3d3626; --warn-fg: #ebcb8b; --info-bg: #263447; --info-fg: #81a1c1;
+  --track: #4c566a; --hover: #434c5e; --input-border: #4c566a; --log-bg: #1c232b; --log-fg: #8fbcbb;
+  --shadow: 0 2px 14px rgba(0,0,0,.35);
+}
+/* 终端绿: 经典 NOC/CRT 终端配色, 近黑背景 + 荧光绿主色, 网络工程师的
+   舒适区; 只在数据强调色上用绿, 别的语义色(红/黄/蓝)照旧不抢戏。 */
+body.theme-terminal {
+  --bg: #0a0f0c; --fg: #d3f9d8; --fg-dim: #7fae86; --fg-faint: #4f7256;
+  --card-bg: #0f1712; --card-border: #1f3324; --header-grad-a: #060a07; --header-grad-b: #0f1712;
+  --header-fg: #baffc9; --accent: #34d399; --accent-fg: #062014;
+  --good-bg: #0f2a1c; --good-fg: #4ade80; --bad-bg: #2a1212; --bad-fg: #f87171;
+  --warn-bg: #2a2410; --warn-fg: #fbbf24; --info-bg: #0f2430; --info-fg: #38bdf8;
+  --track: #1a2a1f; --hover: #142019; --input-border: #24402f; --log-bg: #000000; --log-fg: #34d399;
+  --shadow: 0 0 0 1px rgba(52,211,153,.08), 0 2px 16px rgba(0,0,0,.6);
+}
+/* 极光紫: 偏时尚的深紫底 + 洋红/靛蓝双色点缀, 卡片对比更跳, 适合大屏
+   投影展示; 语义色刻意提高饱和度, 深色底下才不会显得灰。 */
+body.theme-aurora {
+  --bg: #151022; --fg: #ede9fe; --fg-dim: #b3a9d6; --fg-faint: #7c72a0;
+  --card-bg: #1e1a30; --card-border: #34294f; --header-grad-a: #0f0b1a; --header-grad-b: #241a3d;
+  --header-fg: #ede9fe; --accent: #c084fc; --accent-fg: #1c1030;
+  --good-bg: #17332a; --good-fg: #5eead4; --bad-bg: #3a1530; --bad-fg: #f472b6;
+  --warn-bg: #35271a; --warn-fg: #fbbf24; --info-bg: #201a45; --info-fg: #a5b4fc;
+  --track: #34294f; --hover: #2a2145; --input-border: #3d3160; --log-bg: #0f0b1a; --log-fg: #d8b4fe;
+  --shadow: 0 2px 20px rgba(124,58,237,.18);
+}

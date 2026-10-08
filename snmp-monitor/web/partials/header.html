@@ -1,0 +1,59 @@
+<div class="header">
+  <div>
+    <h1>🚀 局域网智能监控大屏</h1>
+    <p>巡检时间: <b id="checkTime">-</b> | 监控设备: <b id="devCount">0</b> 台 | 未处理告警: <b id="openAlerts">0</b> 条 | <span id="whoamiBox">查看模式(未登录)</span></p>
+  </div>
+  <div class="toolbar">
+    <div class="refresh-panel">
+      <span>⏱️</span>
+      <input type="number" class="refresh-input" id="intervalInput" value="30" min="5" max="600" onchange="updateInterval(this.value)">
+      <span>秒 (<b id="countdown">30</b>s)</span>
+      <button class="hbtn ghost" id="toggleBtn" onclick="toggleAuto()">暂停</button>
+    </div>
+    <select class="theme-select" id="themeSelect" onchange="setTheme(this.value)">
+      <option value="theme-light">🌤️ 浅色</option>
+      <option value="theme-dark">🌙 深色</option>
+      <option value="theme-slate">🌊 靛蓝</option>
+      <option value="theme-paper">📜 纸感</option>
+      <option value="theme-nord">🧊 北欧极地</option>
+      <option value="theme-terminal">💻 终端绿</option>
+      <option value="theme-aurora">🔮 极光紫</option>
+      <optgroup label="── 风格 ──">
+        <option value="style-minimal">◻️ 极简</option>
+        <option value="style-swiss">🟥 瑞士国际主义</option>
+        <option value="style-flat">🟦 扁平化</option>
+        <option value="style-bento">🍱 便当格</option>
+        <option value="style-magazine">📰 杂志</option>
+        <option value="style-glass">🪟 玻璃拟态</option>
+        <option value="style-blackgold">🏆 黑金</option>
+        <option value="style-layered">🗂️ 维度分层</option>
+        <option value="style-scifi">🛸 科幻 HUD</option>
+      </optgroup>
+    </select>
+    <button class="hbtn" onclick="forceRefresh()" data-auth title="马上对全部设备跑一轮 SNMP 巡检(不用等下一个周期)">⚡ 立即巡检</button>
+    <button class="hbtn ghost" onclick="openTopology()" data-view="topology">🗺️ 拓扑</button>
+    <button class="hbtn ghost" onclick="openMACTable()" data-view="mactable">🗂️ MAC 总表</button>
+    <button class="hbtn ghost" onclick="openARPTable()" data-view="arptable">🌐 ARP 总表</button>
+    <button class="hbtn ghost" onclick="openL2Health()" data-view="l2health" title="广播风暴 / 环路 / ARP 欺骗 / IP 冲突 汇总排查">🩺 二层体检</button>
+    <button class="hbtn ghost" onclick="openFlowOverview()" data-view="flows" title="平台 NetFlow / sFlow 汇总和设备回传覆盖率">📡 流量总览</button>
+    <button class="hbtn ghost" onclick="openAlertTable()" data-view="alerts">🚨 事件中心</button>
+    <button class="hbtn ghost" onclick="openBigScreen()" data-view="bigscreen">📺 大屏</button>
+    <button class="hbtn ghost" onclick="openRacks()" data-view="racks">🗄️ 机柜</button>
+    <button class="hbtn ghost" onclick="openReports()" data-view="reports">📑 巡检报告</button>
+    <button class="hbtn ghost" onclick="openBackups()" data-perm="backup_view">💾 配置备份</button>
+    <button class="hbtn ghost" onclick="openDeviceManager()" data-perm="devices">⚙️ 设备管理</button>
+    <button class="hbtn ghost" onclick="openSettings()" data-perm="settings">🛠️ 设置</button>
+    <button class="hbtn ghost" id="usersBtn" onclick="openUsers()" style="display:none;">👥 账号权限</button>
+    <button class="hbtn ghost" onclick="openPassword()" data-auth>🔑 修改口令</button>
+    <button class="hbtn ghost" id="authBtn" onclick="openAuthGate(null)">登录</button>
+  </div>
+</div>
+<!-- 游客访问被管理员关闭时, 未登录只能看到这个登录提示 -->
+<div id="guestLock" class="guest-lock" style="display:none;">
+  <div class="guest-lock-box">
+    <div style="font-size:40px;">🔒</div>
+    <h2>需要登录</h2>
+    <p>管理员关闭了游客访问, 登录后才能查看监控数据。</p>
+    <button class="hbtn" onclick="openAuthGate(function () { refreshNow(); })">登录</button>
+  </div>
+</div>

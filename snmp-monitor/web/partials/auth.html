@@ -1,0 +1,15 @@
+<div class="modal-overlay" id="authModal">
+  <div class="modal-content small" style="max-width:400px;">
+    <div class="modal-header">
+      <h2 style="margin:0;font-size:18px;">需要登录</h2>
+      <button class="modal-close" onclick="closeAuthGate()">&times;</button>
+    </div>
+    <div class="modal-body gate-box">
+      <p style="color:var(--fg-dim);font-size:13px;margin-top:0;">查看仪表盘不需要登录, 这个操作需要登录(管理员, 或被分配了相应权限的账号)。</p>
+      <input id="gateUser" placeholder="用户名" autocomplete="username">
+      <input id="gatePass" type="password" placeholder="口令" autocomplete="current-password">
+      <button class="hbtn" style="width:240px;margin-top:10px;" onclick="doGateLogin()">登 录</button>
+      <div class="notice" id="gateNotice" style="max-width:240px;margin:12px auto 0;"></div>
+    </div>
+  </div>
+</div>

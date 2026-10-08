@@ -1,0 +1,60 @@
+<div class="modal-overlay" id="reportModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">📑 巡检报告</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">机器报告按规则从最近一轮巡检数据生成; AI 报告把机器报告交给大模型写结论与建议。只有管理员能生成, 公开后游客可见。</div>
+      </div>
+      <button class="modal-close" onclick="closeReports()">&times;</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;">
+      <div class="rpt-bar" id="rptAdminBar" style="display:none;">
+        <select id="rptTarget"></select>
+        <label style="font-size:13px;"><input type="checkbox" id="rptAI"> 附带 AI 分析</label>
+        <label style="font-size:13px;"><input type="checkbox" id="rptPublic"> 生成后公开给游客</label>
+        <button class="hbtn" onclick="generateReport()">生成报告</button>
+        <span id="rptMsg" style="font-size:12.5px;color:var(--fg-dim);"></span>
+        <span style="flex:1;"></span>
+        <button class="filter-btn" onclick="toggleReportSettings()">⚙️ 报告设置</button>
+      </div>
+      <div id="rptSettings" style="display:none;" class="rpt-bar" >
+        <div style="width:100%;">
+          <div class="chart-title">游客可见性</div>
+          <label style="font-size:13px;"><input type="checkbox" id="rsGuest"> 允许游客查看巡检报告(总开关; 游客只能看到单独标记为「公开」的报告)</label>
+          <div class="chart-title" style="margin-top:14px;">定时生成</div>
+          <div class="rpt-form">
+            <div><label><input type="checkbox" id="rsAuto" style="width:auto;"> 每天定时生成全网报告</label></div>
+            <div><label>生成时刻(0~23 点)</label><input type="number" id="rsHour" min="0" max="23"></div>
+            <div><label><input type="checkbox" id="rsPerDev" style="width:auto;"> 同时给每台设备各生成一份</label></div>
+            <div><label><input type="checkbox" id="rsAutoAI" style="width:auto;"> 定时报告附带 AI 分析</label></div>
+            <div><label><input type="checkbox" id="rsAutoPub" style="width:auto;"> 定时报告自动公开</label></div>
+            <div><label>最多保留份数</label><input type="number" id="rsKeep" min="10" max="5000"></div>
+          </div>
+          <div class="chart-title" style="margin-top:6px;">AI 接口</div>
+          <div class="rpt-form">
+            <div><label>接口类型</label><select id="rsProvider" onchange="rsProviderHint()">
+              <option value="anthropic">Anthropic Claude API</option>
+              <option value="openai">OpenAI 兼容接口 (DeepSeek / 通义千问 / Kimi / Ollama / vLLM ...)</option>
+            </select></div>
+            <div><label>Base URL</label><input type="text" id="rsBase" placeholder=""></div>
+            <div><label>模型</label><input type="text" id="rsModel"></div>
+            <div><label>API Key <span id="rsKeyState" style="color:var(--fg-faint);"></span></label><input type="password" id="rsKey" placeholder="留空 = 保持不变" autocomplete="new-password"></div>
+            <div><label>最大输出 tokens</label><input type="number" id="rsMaxTok" min="500" max="64000"></div>
+            <div style="grid-column:1/-1;"><label>补充要求(可选, 会附在提示词后面)</label><textarea id="rsExtra" rows="2" placeholder="例如: 结尾附一张按优先级排序的整改清单表格"></textarea></div>
+          </div>
+          <div class="hint" id="rsHint"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="hbtn" onclick="saveReportSettings(false)">保存设置</button>
+            <button class="filter-btn" onclick="saveReportSettings(true)">测试 AI 连接</button>
+            <button class="filter-btn" onclick="clearReportKey()">清除 API Key</button>
+            <span id="rsMsg" style="font-size:12.5px;align-self:center;"></span>
+          </div>
+        </div>
+      </div>
+      <div class="two-pane">
+        <div class="pane-list" id="rptList"></div>
+        <div class="pane-main" id="rptView"><div class="empty">从左侧选择一份报告</div></div>
+      </div>
+    </div>
+  </div>
+</div>

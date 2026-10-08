@@ -1,0 +1,20 @@
+<div class="modal-overlay" id="topoModal">
+  <div class="modal-content tpm">
+    <div class="tpm-head">
+      <h2>🗺️ 网络拓扑</h2>
+      <div class="tpm-seg"><button id="tpSeg2d" class="on" onclick="tpSet3D(false)">🗺️ 2D 平面</button><button id="topo3dBtn" onclick="tpSet3D(true)">🧊 3D 立体</button></div>
+      <input type="text" class="search-box" id="topoSearch" placeholder="搜索设备名 / IP / 型号 / 备注..." oninput="topoHighlight()">
+      <span id="topo3dCtl">
+        <label title="闲置时缓慢自动旋转"><input type="checkbox" id="t3Auto" onchange="t3SetAuto(this.checked)"> 自动旋转</label>
+        <label title="链路上的流量粒子; 低配电脑可以关掉"><input type="checkbox" id="t3Particles" onchange="t3SetParticles(this.checked)"> 流量粒子</label>
+      </span>
+      <span id="topoHint" class="tpm-hint"></span>
+      <span id="topoFs"></span>
+      <button class="modal-close" onclick="closeTopology()">&times;</button>
+    </div>
+    <div class="tpm-body">
+      <div id="topoWrap"></div>
+      <div class="notice" id="topoNotice"></div>
+    </div>
+  </div>
+</div>

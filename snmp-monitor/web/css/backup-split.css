@@ -1,0 +1,25 @@
+/*
+ * 配置备份: 表格 / 下半部分分屏动画。
+ */
+/* ================= 配置备份: 表格先铺满, 打开下半部分(版本 / 凭据 / 上传)时表格缩到一半 ================= */
+#backupModal .modal-body { display: flex; flex-direction: column; overflow: hidden; }
+/* 高度变化由 bkSetSplit 用 Web Animations 做(flex-grow 的 CSS 过渡在 Chrome/Edge 里是直接跳变的), 这里只管淡入和上移 */
+#bkTableWrap { flex: 1 1 0; min-height: 120px; overflow: auto; border-radius: 10px; transition: box-shadow .3s; }
+#bkPanelBox { position: relative; flex: 0 1 0; min-height: 0; overflow: hidden; opacity: 0; transform: translateY(28px);
+  transition: opacity .35s ease, transform .5s cubic-bezier(.2,.8,.2,1), margin-top .5s; }
+#bkPanelBox > #bkPanel { height: 100%; overflow: auto; margin-top: 0 !important; }
+#backupModal.bk-split #bkTableWrap { flex-grow: .85; box-shadow: inset 0 -12px 12px -12px rgba(0,0,0,.25); }
+#backupModal.bk-split #bkPanelBox { flex-grow: 1.15; opacity: 1; transform: none; margin-top: 12px; }
+.bk-collapse { position: absolute; right: 10px; top: 8px; z-index: 2; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--fg-dim);
+  border-radius: 14px; padding: 3px 12px; font-size: 12px; cursor: pointer; }
+.bk-collapse:hover { color: var(--fg); border-color: var(--accent); }
+#bkBody tr.bk-cur td { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+/* 分隔条: 只在分屏时出现, 拖动改表格高度(bkState.tableH), 下半部分自动占剩下的 */
+#bkSplitter { display: none; flex: 0 0 8px; margin: 4px 0 -8px; cursor: row-resize; border-radius: 4px; position: relative; }
+#bkSplitter::after { content: ""; position: absolute; left: 50%; top: 3px; width: 48px; height: 3px; margin-left: -24px; border-radius: 2px; background: var(--card-border); }
+#bkSplitter:hover::after, #bkSplitter.drag::after { background: var(--accent); }
+#backupModal.bk-split #bkSplitter { display: block; }
+.bk-collapse.bk-max { right: 84px; }
+/* 配置 / 对比在下半部分里铺满, 由面板滚动, 不再限制 60vh */
+#bkPanel .cfg-pre { max-height: none; }
+@media (prefers-reduced-motion: reduce) { #bkTableWrap, #bkPanelBox { transition: none; } }

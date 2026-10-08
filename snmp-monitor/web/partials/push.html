@@ -1,0 +1,60 @@
+<div class="modal-overlay" id="pushModal">
+  <div class="modal-content wide" id="pushBox">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">🛠️ 配置下发</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">用「💾 配置备份」里保存的登录凭据, 给交换机下发 sFlow / syslog / NetFlow 配置或执行自定义命令。先生成预览, 每台设备的命令都可以改, 确认后再执行; 某条命令被设备拒绝就停在那一台, 不会保存。</div>
+      </div>
+      <div class="tb"><span id="pushFs"></span><button class="modal-close" onclick="closePush()">&times;</button></div>
+    </div>
+    <div class="modal-body">
+      <div class="push-form" id="pushForm">
+        <label>类型
+          <select id="pushKind" onchange="pushKindChanged()">
+            <option value="sflow">sFlow 流量采样(华为 / H3C / 锐捷 / Cisco NX-OS)</option>
+            <option value="syslog">Syslog 日志推送</option>
+            <option value="netflow">NetFlow v5(Cisco IOS)</option>
+            <option value="custom">自定义命令</option>
+          </select>
+        </label>
+        <label class="pk pk-sflow pk-syslog pk-netflow">采集器 / 日志服务器 IP
+          <input id="pushCollector" list="pushIPs" placeholder="本机能被交换机访问到的地址" autocomplete="off">
+          <datalist id="pushIPs"></datalist>
+        </label>
+        <label class="pk pk-sflow pk-syslog pk-netflow">端口 <input id="pushPort" type="number" min="1" max="65535" style="width:90px;"></label>
+        <label class="pk pk-sflow">抽样比 1:<input id="pushRate" type="number" min="64" value="1000" style="width:90px;"></label>
+        <label class="pk pk-sflow">计数器上报(秒) <input id="pushInterval" type="number" min="5" max="3600" value="20" style="width:70px;"></label>
+        <label class="pk pk-syslog">级别
+          <select id="pushLevel">
+            <option value="informational">informational(推荐)</option><option value="notifications">notifications</option>
+            <option value="warnings">warnings</option><option value="errors">errors</option><option value="debugging">debugging</option>
+          </select>
+        </label>
+        <label class="pk pk-custom" style="flex:1 1 100%;">命令(每行一条, 原样发给设备; 进配置模式/退出要自己写)
+          <textarea id="pushCustom" rows="5" placeholder="system-view&#10;ntp-service unicast-server 10.0.0.1&#10;return"></textarea>
+        </label>
+        <label style="flex-direction:row;align-items:center;gap:6px;"><input type="checkbox" id="pushSave" checked style="width:auto;"> 执行完保存配置</label>
+        <div class="push-warn" id="pushPortWarn"></div>
+      </div>
+
+      <div class="push-cols">
+        <div class="push-devs">
+          <div class="tb">
+            <input type="text" class="search-box" id="pushQ" placeholder="搜设备 / IP…" oninput="renderPushDevices()" autocomplete="off">
+            <button class="btn sm" onclick="pushSelectAll(true)">全选</button>
+            <button class="btn sm" onclick="pushSelectAll(false)">清空</button>
+          </div>
+          <div id="pushDevList" class="push-devlist"><div class="empty">加载中…</div></div>
+        </div>
+        <div class="push-right">
+          <div class="tb">
+            <button class="hbtn" onclick="pushPreview()">👁 生成预览</button>
+            <button class="hbtn" id="pushRunBtn" onclick="pushRun()" disabled>▶ 执行下发</button>
+            <span id="pushMsg" style="font-size:12.5px;"></span>
+          </div>
+          <div id="pushPlans" class="push-plans"><div class="empty">左边选设备, 填好参数后点「生成预览」</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

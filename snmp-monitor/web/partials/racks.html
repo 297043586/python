@@ -1,0 +1,32 @@
+<div class="modal-overlay" id="rackModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;display:flex;align-items:center;gap:12px;">🗄️ 机柜 / 机房
+          <span class="rack-viewsw"><button id="rackView3d" onclick="rackSetView('3d')">🏢 3D 机房</button><button id="rackView2d" onclick="rackSetView('2d')">🗄️ 2D 机柜面板</button></span></h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="rackHint"></div>
+      </div>
+      <button class="modal-close" onclick="closeRacks()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="dcPane" style="display:none;"></div>
+      <div id="rack2dPane">
+      <div class="table-toolbar" style="position:relative;">
+        <div class="pv-tools">
+          <select id="pvRoom" onchange="PV.room=this.value;byId('rackSel').value='';renderRacks()"></select>
+          <select id="rackSel" onchange="renderRacks()"></select>
+          <input type="text" class="search-box" id="rackSearch" placeholder="搜索设备 / 备注 / 端口 / 对端..." oninput="renderRacks()" style="width:230px;">
+          <label style="font-size:13px;color:var(--fg-dim);"><input type="checkbox" id="rackProblems" onchange="renderRacks()"> 只突出有问题的端口</label>
+        </div>
+        <div class="pv-tools">
+          <button class="filter-btn" id="pvCfgBtn" onclick="pvToggleCfg(event)">🎨 显示设置</button>
+          <button class="filter-btn" id="rackEditBtn" data-perm="datacenter" onclick="toggleRackEdit()">📐 编辑机柜</button>
+        </div>
+        <div class="pv-cfg" id="pvCfg"></div>
+      </div>
+      <div id="rackLegend"></div>
+      <div class="pnl-wrap" id="rackWrap" style="position:relative;"><div id="rackStage" class="pv-stage"></div><div class="tip" id="rackTip"></div></div>
+      </div>
+    </div>
+  </div>
+</div>

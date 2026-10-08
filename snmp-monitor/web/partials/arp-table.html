@@ -1,0 +1,25 @@
+<div class="modal-overlay" id="arpModal">
+  <div class="modal-content wide" id="arpBox">
+    <div class="modal-header">
+      <div>
+        <h2 id="garpTitle" style="margin:0;font-size:18px;">🌐 全网 ARP 总表</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="garpSub">汇总所有设备的 IP-MAC 绑定; 可以直接按 IP 或 MAC 搜, 不用先去 MAC 表反查; 红色是 IP 冲突, 橙色是同一网段里一个 MAC 挂了好几个 IP(排查 ARP 攻击/中毒看这两列); 三层交换机自己的各个接口、路由器跨网段的多个接口单独标出, 不算异常</div>
+      </div>
+      <div class="tb"><span id="garpFs"></span><button class="modal-close" onclick="closeARPTable()">&times;</button></div>
+    </div>
+    <div class="modal-body fill">
+      <div class="tb">
+        <input type="text" class="search-box" id="garpSearch" placeholder="搜 IP / MAC(任意写法) / 设备 / 端口…" autocomplete="off">
+        <div class="ms" id="garpVlanFilter" data-all="全部 VLAN" data-label="VLAN" data-change="renderGlobalARPTable"></div>
+        <div class="ms" id="garpDeviceFilter" data-all="全部设备" data-label="设备" data-change="renderGlobalARPTable"></div>
+        <div class="ms" id="garpKindFilter" data-all="全部类型" data-label="类型" data-change="renderGlobalARPTable"></div>
+        <button class="btn sm" onclick="garpClear()">✕ 清除筛选</button>
+        <span class="grow"></span>
+        <button class="btn sm" onclick="garpExport()" title="导出当前筛选结果">📥 导出 CSV</button>
+        <button class="btn sm" onclick="openARPTable(true)" title="重新拉取">⟳</button>
+      </div>
+      <div class="gmac-stat" id="garpStat"></div>
+      <div id="garpTable" class="vt-fill"></div>
+    </div>
+  </div>
+</div>

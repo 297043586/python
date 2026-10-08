@@ -1,0 +1,44 @@
+<div class="modal-overlay" id="flowOverviewModal">
+  <div class="modal-content wide" id="flowOverviewBox">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">📡 平台流量总览</h2>
+        <div id="flowOverviewHint" style="font-size:12px;color:var(--fg-dim);margin-top:4px;">全平台 NetFlow / sFlow 汇总</div>
+      </div>
+      <div class="tb">
+        <label class="tb-label" for="flowOverviewWindow">统计窗口</label>
+        <select id="flowOverviewWindow" class="sel">
+          <option value="60">最近 1 分钟</option><option value="300" selected>最近 5 分钟</option>
+          <option value="900">最近 15 分钟</option><option value="1800">最近 30 分钟</option><option value="0">缓冲区全部</option>
+        </select>
+        <button class="btn sm" onclick="loadFlowOverview()">⟳ 刷新</button>
+        <span id="flowOverviewFs"></span>
+        <button class="modal-close" onclick="closeFlowOverview()">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body" style="overflow:auto;">
+      <div id="flowOverviewCoverage" class="gmac-stat"></div>
+      <div id="flowOverviewSummary" class="hw-grid" style="margin:10px 0 16px;"></div>
+      <section class="panel" style="margin-bottom:14px;">
+        <h3>全网流量趋势 <span class="muted">10 秒粒度 · 抽样估算</span></h3>
+        <div id="flowOverviewTimeline" style="min-height:80px;"></div>
+      </section>
+      <section class="panel" style="margin-bottom:14px;">
+        <h3>设备回传覆盖 <span class="muted" id="flowOverviewCoverageNote"></span></h3>
+        <div class="table-wrap" style="max-height:38vh;overflow:auto;">
+          <table><thead><tr><th>设备</th><th>回传状态</th><th>窗口内流记录</th><th>sFlow</th><th>NetFlow</th><th>接口计数器</th><th>最近流记录</th><th>最近计数器</th></tr></thead>
+            <tbody id="flowOverviewDevices"><tr><td colspan="8" class="muted">加载中…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel">
+        <h3>全平台会话 Top 20</h3>
+        <div class="table-wrap" style="max-height:35vh;overflow:auto;">
+          <table><thead><tr><th>源 IP</th><th>目的 IP</th><th>目的端口</th><th>协议</th><th>估算流量</th><th>估算包数</th><th>流记录</th></tr></thead>
+            <tbody id="flowOverviewTalkers"><tr><td colspan="7" class="muted">加载中…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

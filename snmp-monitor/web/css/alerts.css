@@ -1,0 +1,36 @@
+/*
+ * 告警中心(v13): 当前告警 / 历史记录 / 统计分析 + 右侧详情抽屉。
+ */
+.ac-head { gap: 14px; flex-wrap: wrap; }
+.ac-head > div:first-child { flex: 1; min-width: 200px; }
+.ac-tabs button { padding: 7px 14px; font-weight: 600; }
+.ac-tabs b { background: var(--bad); color: #fff; border-radius: 9px; padding: 0 6px; font-size: 11px; margin-left: 2px; }
+.ac-tabs b:empty { display: none; }
+.ac-body { position: relative; padding-top: 14px; }
+.ac-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.ac-pane.stat-mode .ac-hist-only { display: none !important; }
+.ac-pane:not(.stat-mode) .ac-stat { display: none; }
+.ac-stat { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 6px; }
+.ac-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
+.ac-grid .ac-wide { grid-column: 1 / -1; }
+.ac-click { cursor: pointer; border-radius: 5px; padding: 1px 4px; margin-left: -4px; margin-right: -4px; }
+.ac-click:hover { background: var(--hover); }
+
+/* 行的左侧色条 = 状态 */
+.vt-row.ac-crit { box-shadow: inset 3px 0 0 var(--bad); }
+.vt-row.ac-warn { box-shadow: inset 3px 0 0 var(--warn); }
+.vt-row.ac-rec { box-shadow: inset 3px 0 0 var(--info); }
+.vt-row.ac-done { box-shadow: inset 3px 0 0 var(--fg-faint); color: var(--fg-dim); }
+.vt-row.sel { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.vt-row .alert-actions { gap: 4px; }
+.vt-row .abtn { padding: 3px 8px; }
+.ac-live { color: var(--bad); animation: acPulse 1.6s ease-in-out infinite; }
+@keyframes acPulse { 50% { opacity: .45; } }
+
+/* 抽屉 */
+.ac-text { background: var(--hover); border-radius: 8px; padding: 9px 11px; line-height: 1.6; margin-bottom: 6px; }
+.ac-h4 { margin: 14px 0 6px; font-size: 13px; color: var(--fg-dim); }
+.ac-occ > div { display: grid; grid-template-columns: 1.2fr 1fr .8fr; gap: 8px; padding: 5px 6px; border-bottom: 1px dashed var(--card-border); font-size: 12.5px; cursor: pointer; border-radius: 5px; }
+.ac-occ > div:hover { background: var(--hover); }
+.ac-occ > div.cur { background: color-mix(in srgb, var(--accent) 14%, transparent); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .ac-live { animation: none; } }

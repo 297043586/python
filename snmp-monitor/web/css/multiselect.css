@@ -1,0 +1,21 @@
+/*
+ * 多选筛选下拉。
+ */
+/* ---------- 多选下拉 ---------- */
+.ms { position: relative; display: inline-block; }
+.ms-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--fg);
+  font-size: 13px; cursor: pointer; max-width: 240px; white-space: nowrap; }
+.ms-btn .ms-text { overflow: hidden; text-overflow: ellipsis; }
+.ms.on .ms-btn { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.ms-caret { color: var(--fg-faint); font-size: 11px; }
+.ms-pop { display: none; position: absolute; z-index: 60; top: calc(100% + 4px); left: 0; min-width: 220px; max-width: 360px; background: var(--card-bg); color: var(--fg);
+  border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,.28); padding: 8px; }
+.ms.open .ms-pop { display: block; }
+.ms-q { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--card-bg); color: var(--fg); font-size: 13px; }
+.ms-acts { display: flex; gap: 12px; font-size: 12px; margin: 6px 2px; }
+.ms-acts a { color: var(--accent); cursor: pointer; }
+.ms-list { max-height: 280px; overflow: auto; }
+.ms-list label { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 5px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.ms-list label:hover { background: var(--hover); }
+.ms-list label small { margin-left: auto; color: var(--fg-faint); font-size: 11.5px; padding-left: 10px; }
+.ms-list .ms-empty { color: var(--fg-faint); font-size: 12px; padding: 8px; }

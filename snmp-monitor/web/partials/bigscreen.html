@@ -1,0 +1,32 @@
+<div id="bsRoot">
+  <div id="bsStage">
+    <div id="bsFx"></div>
+    <div class="bs-head">
+      <div><div class="bs-clock" id="bsClock">--:--:--</div><div class="bs-date" id="bsDate"></div></div>
+      <div class="bs-title" id="bsTitle" data-t="网络运行态势总览">网络运行态势总览</div>
+      <div class="bs-sub" id="bsSub">数据加载中...</div>
+      <div class="bs-btns"><span class="bs-next" id="bsNext"></span><button class="bs-btn" onclick="bsToggleCfg()" title="大屏设置">⚙</button><button class="bs-btn" onclick="bsFullscreen()">⛶ 全屏</button><button class="bs-btn" onclick="closeBigScreen()">✕ 退出</button></div>
+    </div>
+    <div class="bs-cfg" id="bsCfg"></div>
+    <div class="bs-drawer" id="bsDrawer"></div>
+    <div class="bs-toast" id="bsToast"></div>
+    <div class="bs-body" id="bsBody">
+      <div class="bs-panel bs-map p-map" id="bsMapPanel"><div class="bs-ptitle" id="bsMapTitle">站点态势</div>
+        <div class="bs-views" id="bsViews"></div>
+        <canvas id="bsMap" class="bs2d"></canvas>
+        <div class="bs-3d" id="bsTopo3d"></div>
+        <div class="bs-3d" id="bsDc3d"></div>
+        <div class="bs-health" id="bsHealth"></div>
+        <div class="bs-maplegend" id="bsLegend"></div>
+        <div class="bs-maptip" id="bsMapTip"></div>
+      </div>
+      <div class="bs-panel p-kpi"><div class="bs-ptitle" id="bsKpiTitle">运行概况</div><div class="bs-kpis" id="bsKpis"></div></div>
+      <div class="bs-panel p-risk"><div class="bs-ptitle">风险设备排行<small>健康评分由低到高</small><span class="r" id="bsRiskN"></span></div><div class="bs-list bs-scroll" id="bsRisk"></div></div>
+      <div class="bs-panel p-cats"><div class="bs-ptitle">告警分类<small>未处理</small></div><div class="bs-list bs-scroll" id="bsCats"></div></div>
+      <div class="bs-panel bs-trend p-trend"><div class="bs-ptitle">全网端口吞吐趋势<small>近 24 小时, 各设备端口入/出速率之和</small></div><canvas id="bsTrend"></canvas></div>
+      <div class="bs-panel p-feed"><div class="bs-ptitle">实时告警<small id="bsAlertCount"></small><span class="r">滚轮/拖动可翻看</span></div><div class="bs-scroll" id="bsFeed"></div></div>
+      <div class="bs-panel p-hot"><div class="bs-ptitle">最忙端口<small>按利用率</small></div><div class="bs-list bs-scroll" id="bsHot"></div></div>
+      <div class="bs-panel p-apps"><div class="bs-ptitle" id="bsAppTitle">应用流量 Top<small>最近 5 分钟</small></div><div class="bs-list bs-scroll" id="bsApps"></div></div>
+    </div>
+  </div>
+</div>

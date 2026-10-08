@@ -1,0 +1,45 @@
+/*
+ * 首页: 工具条 / 分组标题条 / 卡片 / 紧凑卡片 / 列表(v13)。
+ * .card / .card-grid 这几个类名保持不变, 风格主题(styles.css)对它们的定制照样生效。
+ */
+.home-tb { margin: -8px 0 14px; padding: 10px 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: var(--shadow); }
+.home-tb .search-box { width: 300px; }
+#homeBody { display: flex; flex-direction: column; gap: 14px; }
+.hgrp { display: flex; flex-direction: column; gap: 12px; }
+.hgrp-h { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 10px; background: var(--card-bg); border: 1px solid var(--card-border);
+  cursor: pointer; user-select: none; font-size: 14px; flex-wrap: wrap; position: relative; overflow: hidden; }
+.hgrp-h::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent); }
+.hgrp-h:hover { background: var(--hover); }
+.hgrp-h b { font-size: 15px; }
+.hgrp-k { font-size: 11.5px; color: var(--fg-faint); border: 1px solid var(--card-border); border-radius: 5px; padding: 0 6px; }
+.hgrp-st { display: flex; gap: 14px; font-size: 12.5px; color: var(--fg-dim); flex-wrap: wrap; }
+.hgrp-st span { display: inline-flex; align-items: center; gap: 5px; }
+.hgrp-hl { margin-left: auto; width: 120px; height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.hgrp-hl i { display: block; height: 100%; border-radius: 3px; transition: width .4s; }
+.hgrp.folded .hgrp-h { opacity: .85; }
+
+.card-tags { margin-top: -6px; color: var(--fg-dim); }
+.card-note { margin-top: -6px; color: var(--accent); }
+.card-m { font-size: 13px; margin: 8px 0; }
+.card-m > div:first-child { display: flex; justify-content: space-between; }
+.card-foot { font-size: 13px; color: var(--fg-dim); margin-top: 12px; display: flex; justify-content: space-between; gap: 8px; }
+
+/* 紧凑卡片 */
+.card-grid.compact { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.card.mini { padding: 10px 12px; border-top-width: 3px; border-radius: 9px; }
+.card.mini:hover { transform: translateY(-2px); }
+.mini-h { display: flex; align-items: center; gap: 7px; font-size: 13.5px; min-width: 0; }
+.mini-h b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-h .badge { padding: 1px 7px; margin: 0; }
+.mini-s { font-size: 12px; color: var(--fg-dim); margin: 3px 0 7px 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-m { display: grid; grid-template-columns: 30px 1fr 36px; align-items: center; gap: 6px; font-size: 11.5px; color: var(--fg-dim); margin-top: 3px; }
+.mini-m .progress-bar-wrap { height: 5px; margin: 0; }
+.mini-m em { font-style: normal; text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
+.mini-off { font-size: 12px; color: var(--bad); margin: 6px 0 2px 15px; font-weight: 600; }
+
+/* 列表 */
+.dev-list th[data-hsort] { cursor: pointer; }
+.dev-list tbody.hg-row td { padding: 6px 6px; background: var(--bg); border-bottom: 0; }
+.dev-list tbody.hg-row tr { box-shadow: none; cursor: default; }
+.dev-list tbody.hg-row .hgrp-h { margin: 4px 0; }
+@media (max-width: 900px) { .home-tb .search-box { width: 100%; } .hgrp-hl { display: none; } }

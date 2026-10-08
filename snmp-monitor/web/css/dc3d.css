@@ -1,0 +1,69 @@
+/*
+ * 3D 机房。
+ */
+.rack-viewsw { display: inline-flex; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
+.rack-viewsw button { border: 0; background: var(--card-bg); color: var(--fg); padding: 5px 12px; font-size: 13px; cursor: pointer; }
+.rack-viewsw button.active { background: var(--accent); color: var(--accent-fg); }
+.rack-viewsw button:disabled { opacity: .45; cursor: not-allowed; }
+#dcPane .table-toolbar { margin-bottom: 8px; }
+.dc-wrap { position: relative; height: 70vh; border-radius: 10px; overflow: hidden; border: 1px solid var(--card-border); background: #0b1220; }
+.dc-stage { position: absolute; inset: 0; cursor: grab; }
+.dc-side { position: absolute; top: 10px; right: 10px; bottom: 10px; width: 330px; background: rgba(10,16,30,.86); color: #dbe4f3; border: 1px solid rgba(56,189,248,.25);
+  border-radius: 10px; padding: 12px 14px; overflow: auto; font-size: 13px; backdrop-filter: blur(6px); z-index: 3; }
+.dc-side.min { bottom: auto; }
+.dc-side h4 { margin: 0 0 6px; font-size: 15px; color: #fff; display: flex; align-items: center; gap: 6px; }
+.dc-side .sub { color: #94a3b8; font-size: 12px; }
+.dc-side table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.dc-side td { padding: 3px 4px; border-bottom: 1px dashed rgba(148,163,184,.18); vertical-align: top; color: #dbe4f3; background: transparent; }
+.dc-side tr:hover td { background: transparent; }
+.dc-side td.u { width: 42px; color: #64748b; font-family: Consolas, monospace; }
+.dc-side .dc-row { cursor: pointer; } .dc-side .dc-row:hover td { background: rgba(56,189,248,.1); }
+.dc-side label { display: block; font-size: 12px; color: #94a3b8; margin-top: 6px; }
+.dc-side input, .dc-side select, .dc-side textarea { width: 100%; box-sizing: border-box; padding: 5px 7px; margin-top: 2px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 13px; }
+.dc-side .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+.dc-side .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.dc-side button { font-size: 12.5px; padding: 5px 10px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; cursor: pointer; }
+.dc-side button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+.dc-side button.bad { color: #fca5a5; border-color: #7f1d1d; }
+.dc-side hr { border: 0; border-top: 1px solid rgba(148,163,184,.2); margin: 10px 0; }
+.dc-side .chip { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11.5px; background: rgba(148,163,184,.18); margin: 1px 2px; }
+.dc-side .msg { font-size: 12px; margin-top: 6px; min-height: 16px; }
+.dc-side .x { position: absolute; right: 10px; top: 8px; cursor: pointer; color: #94a3b8; font-size: 16px; }
+.dc-tip { position: absolute; z-index: 4; pointer-events: none; display: none; background: rgba(2,8,23,.94); color: #e2e8f0; border: 1px solid rgba(56,189,248,.45);
+  border-radius: 8px; padding: 8px 12px; font-size: 12.5px; line-height: 1.6; max-width: 340px; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.dc-hud { position: absolute; left: 12px; top: 10px; z-index: 2; color: #cbd5e1; font-size: 12.5px; background: rgba(2,8,23,.6); padding: 6px 12px; border-radius: 8px; pointer-events: none; }
+.dc-hud b { color: #fff; }
+.dc-legend { position: absolute; left: 12px; bottom: 10px; z-index: 2; color: #cbd5e1; font-size: 12px; background: rgba(2,8,23,.6); padding: 6px 12px; border-radius: 8px; pointer-events: none; line-height: 1.7; }
+.dc-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin: 0 4px 0 10px; vertical-align: -1px; }
+.dc-legend i:first-child { margin-left: 0; }
+.dc-mode { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); z-index: 3; background: #f59e0b; color: #111; font-weight: 600; padding: 6px 14px; border-radius: 8px; font-size: 13px; display: none; }
+.dc-dirty { color: #f59e0b; font-size: 12.5px; }
+.dc-card { position: absolute; z-index: 5; width: 470px; max-width: calc(100% - 360px); background: rgba(10,16,30,.94); color: #dbe4f3; border: 1px solid rgba(56,189,248,.45);
+  border-radius: 12px; padding: 12px 14px; font-size: 13px; box-shadow: 0 16px 40px rgba(0,0,0,.5); backdrop-filter: blur(6px); animation: dcCardIn .18s ease-out; }
+@keyframes dcCardIn { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+.dc-card h4 { margin: 0 26px 2px 0; font-size: 15px; color: #fff; }
+.dc-card .sub { color: #94a3b8; font-size: 12px; }
+.dc-card .x { position: absolute; right: 10px; top: 6px; cursor: pointer; color: #94a3b8; font-size: 18px; }
+.dc-card .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.dc-card .chips span { background: rgba(148,163,184,.14); border-radius: 10px; padding: 2px 9px; font-size: 12px; }
+.dc-card .note { background: rgba(245,158,11,.14); border-left: 3px solid #f59e0b; padding: 4px 8px; border-radius: 6px; margin: 6px 0; white-space: pre-wrap; }
+.dc-card .pv-dsvg { margin: 6px 0 2px; border-radius: 6px; }
+.dc-card .port { background: rgba(56,189,248,.1); border-radius: 6px; padding: 6px 9px; margin-top: 6px; font-size: 12.5px; line-height: 1.6; }
+.dc-card .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.dc-card button { font-size: 12.5px; padding: 5px 10px; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #e2e8f0; cursor: pointer; }
+.dc-card button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; }
+
+/* v14: 机房整体平移按钮 / 工具栏里的「落地设备 / 场景」下拉 */
+.dc-nudge { padding: 1px 9px; margin-left: 4px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--fg); cursor: pointer; }
+.dc-nudge:hover { border-color: var(--accent, #38bdf8); }
+select#dcAddSel { cursor: pointer; }
+select.dc-cutsel { margin-left: 6px; padding: 1px 4px; border-radius: 5px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--fg); font-size: 12px; }
+
+/* 全屏: 编辑时工具条搬进画面顶部; 只看时收起面板(dc3d.js dcFsSync) */
+.dc-wrap .dc-fs-toolbar { position: absolute; top: 8px; left: 8px; right: 350px; z-index: 6; margin: 0; padding: 8px 10px; border-radius: 10px;
+  background: rgba(10,16,30,.88); border: 1px solid rgba(56,189,248,.25); backdrop-filter: blur(6px); color: #dbe4f3; }
+.dc-wrap .dc-fs-toolbar .filter-btn, .dc-wrap .dc-fs-toolbar select, .dc-wrap .dc-fs-toolbar input { background: rgba(30,41,59,.9); color: #e2e8f0; border-color: rgba(148,163,184,.35); }
+.dc-wrap.dc-fs-clean .dc-side, .dc-wrap.dc-fs-clean .dc-legend { display: none; }
+.dc-wrap.dc-fs-clean .gl-bar.dc { right: 12px !important; }
+.dc-wrap .dc-fs-toolbar ~ .gl-bar.dc { top: 70px; }
+.gl-bar .fs-btn.on { outline: 2px solid #38bdf8; }

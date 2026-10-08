@@ -1,0 +1,108 @@
+<div class="modal-overlay" id="mgrModal">
+  <div class="modal-content small">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">⚙️ 设备管理</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">新增或删除节点即时生效, 无需重启程序; 需要管理员登录</div>
+      </div>
+      <button class="modal-close" onclick="closeMgr()">&times;</button>
+    </div>
+    <div class="modal-body" id="mgrBodyWrap">
+      <div class="notice" id="mgrNotice"></div>
+      <div style="background:var(--hover);border:1px solid var(--card-border);border-radius:8px;padding:16px;margin-bottom:18px;">
+        <div style="font-weight:600;font-size:14px;margin-bottom:12px;" id="formTitle">新增节点</div>
+        <div class="form-grid">
+          <div>
+            <label>设备地址 (IP 或主机名)</label>
+            <input id="fIP" placeholder="10.1.1.1">
+          </div>
+          <div>
+            <label>SNMP 团体名</label>
+            <input id="fCommunity" type="password" autocomplete="new-password" placeholder="必填">
+            <div class="hint" id="fCommunityHint">团体名加密保存, 页面与接口都不会回显</div>
+          </div>
+          <div>
+            <label>厂商</label>
+            <select id="fBrand">
+              <option value="auto">自动识别 (推荐)</option>
+              <option value="ruijie">锐捷 Ruijie</option>
+              <option value="h3c">华三 H3C</option>
+              <option value="huawei">华为 Huawei</option>
+              <option value="cisco">思科 Cisco</option>
+            </select>
+            <div class="hint">没有的品牌可以在「🛠️ 设置 → 厂商 / OID」里添加</div>
+          </div>
+          <div>
+            <label>SNMP 版本</label>
+            <select id="fVersion"><option value="2c">v2c</option><option value="1">v1</option></select>
+          </div>
+          <div>
+            <label>备注</label>
+            <input id="fNote" placeholder="如: 3 楼接入交换机">
+          </div>
+          <div>
+            <label>分组 <span class="hint" style="display:inline;">(首页 / 拓扑按它分组, 比如 1号楼、数据中心A)</span></label>
+            <input id="fGroup" list="fGroupList" maxlength="40" placeholder="可选; 输入新名字或从已有分组里选">
+            <datalist id="fGroupList"></datalist>
+          </div>
+          <div>
+            <label>位置 <span class="hint" style="display:inline;">(机柜/机房自动分组用; 优先于设备自己上报的 sysLocation)</span></label>
+            <input id="fLocation" maxlength="80" placeholder="如: A栋3楼弱电间 A02柜">
+          </div>
+          <div>
+            <label>联系人</label>
+            <input id="fContact" maxlength="80" placeholder="如: 张三 13800000000">
+          </div>
+          <div>
+            <label>所在机柜 <span class="hint" style="display:inline;">(跟「🗄️ 机柜」/ 3D 机房同一份; 留空 = 按位置自动归类)</span></label>
+            <input id="fRack" list="fRackList" maxlength="40" placeholder="如 A02">
+            <datalist id="fRackList"></datalist>
+          </div>
+          <div>
+            <label>U 位 <span class="hint" style="display:inline;">(设备最上面一格, 0 = 自动排)</span></label>
+            <input id="fRackU" type="number" min="0" max="60" value="0">
+          </div>
+          <div>
+            <label>状态</label>
+            <label style="font-weight:400;margin-top:8px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="fDisabled" style="width:auto;"> 暂停巡检</label>
+          </div>
+          <div style="grid-column:1 / -1;">
+            <label>per-VLAN 团体名格式(可选, 形如 <code>%s@%s</code>, 留空表示不用)</label>
+            <input id="fVlanFormat" placeholder="部分设备需要切到对应 VLAN 的团体名才能看全 MAC 表, 不确定就留空">
+          </div>
+        </div>
+        <div style="font-size:12.5px;color:var(--fg-dim);margin-bottom:6px;">CPU / 内存 / 电源 / 风扇 / 端口 UP-DOWN 状态始终采集。以下几项开销更大, 低端/老旧设备可以按需关掉:</div>
+        <div class="check-row">
+          <label><input type="checkbox" id="cOptical" checked> 光衰 (Rx/Tx dBm)</label>
+          <label><input type="checkbox" id="cLLDP" checked> LLDP 邻居</label>
+          <label><input type="checkbox" id="cRates" checked> 端口速率/利用率/错包</label>
+          <label><input type="checkbox" id="cHosts" checked> MAC 表/ARP/IP-MAC 定位</label>
+          <label title="端口丢包/出错包/广播组播/双工/状态持续时间, 以及型号/序列号/软件版本"><input type="checkbox" id="cExt" checked> 扩展信息 (丢包/双工/资产)</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="hbtn" onclick="saveDevice()">保存</button>
+          <button class="hbtn" style="background:#64748b;" onclick="testDevice()">测试连接</button>
+          <button class="hbtn" style="background:#94a3b8;" onclick="resetForm()">清空 / 新增</button>
+        </div>
+      </div>
+      <div class="tb" style="margin-bottom:10px;">
+        <input type="text" class="search-box" id="mgrQ" placeholder="搜索地址 / 备注 / 分组…" oninput="renderDeviceTable()" style="width:220px;">
+        <label class="tb-label"><input type="checkbox" id="mgrByGroup" onchange="renderDeviceTable()" checked> 按分组显示</label>
+        <span class="grow"></span>
+        <span class="tb-label" id="mgrSelInfo"></span>
+        <button class="btn sm" onclick="mgrToggleLLDP()" title="LLDP 看得到、还没加入监控的邻居, 可以一键添加">🔍 LLDP 发现</button>
+        <button class="btn sm" onclick="bulkSetGroup()" id="mgrBulkBtn" disabled title="把勾选的设备放进同一个分组">🏷️ 设置分组</button>
+      </div>
+      <div id="mgrLLDP" style="display:none;border:1px solid var(--card-border);border-radius:8px;padding:10px;margin-bottom:12px;max-height:40vh;overflow:auto;"></div>
+      <table id="mgrTable">
+        <thead><tr>
+          <th style="cursor:default;width:28px;"><input type="checkbox" id="mgrAll" onchange="mgrSelectAll(this.checked)"></th>
+          <th style="cursor:default;">地址</th><th style="cursor:default;">厂商</th>
+          <th style="cursor:default;">版本</th><th style="cursor:default;">分组</th><th style="cursor:default;">备注</th>
+          <th style="cursor:default;">状态</th><th style="cursor:default;">操作</th>
+        </tr></thead>
+        <tbody id="mgrBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>

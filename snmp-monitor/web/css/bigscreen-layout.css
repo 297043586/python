@@ -1,0 +1,160 @@
+/*
+ * 大屏: 各样式的布局。
+ */
+.bs-kpis[data-st] { display: block; height: 100%; }
+.bs-head .bs-btns { margin-left: auto; }
+/* ================= 赛博霓虹: HUD ================= */
+#bsRoot.st-cyber .bs-body { grid-template-columns: 400px 1fr 440px; grid-template-rows: 92px 1fr 1fr 210px;
+  grid-template-areas: "kpi kpi kpi" "risk . feed" "cats . feed" "apps trend hot"; }
+#bsRoot.st-cyber .p-map { grid-area: 1 / 1 / -1 / -1; z-index: 0; background: transparent; border: 0; box-shadow: none; clip-path: none; }
+#bsRoot.st-cyber .p-map::before, #bsRoot.st-cyber .p-map::after { display: none; }
+#bsRoot.st-cyber .p-map .bs-ptitle { left: 50%; right: auto; transform: translateX(-50%); top: 104px; background: none; border: 0; font-size: 15px; color: #00f0ff; text-shadow: 0 0 8px #00f0ff; }
+#bsRoot.st-cyber .p-map .bs-ptitle::before { display: none; }
+#bsRoot.st-cyber .p-map .bs-views { top: 104px; right: 470px; }
+#bsRoot.st-cyber .p-map .bs-health { right: 480px; top: 140px; }
+#bsRoot.st-cyber .p-map .bs-maplegend { left: 440px; bottom: 230px; }
+#bsRoot.st-cyber .p-map .bs-3d { inset: 110px 440px 230px 420px; }
+#bsRoot.st-cyber .bs-body > .bs-panel:not(.p-map) { z-index: 1; background: linear-gradient(135deg, rgba(40,4,64,.78), rgba(8,1,20,.82)); border: 1px solid rgba(255,43,214,.55);
+  box-shadow: 0 0 18px rgba(255,43,214,.25), inset 0 0 24px rgba(0,240,255,.06); padding-top: 42px; }
+#bsRoot.st-cyber .bs-ptitle { background: none; border-bottom: 1px solid rgba(0,240,255,.35); height: 32px; padding-left: 0; font-style: italic; text-transform: uppercase; }
+#bsRoot.st-cyber .bs-ptitle::before { content: ""; width: 120px; height: 32px; margin-right: 12px; background: linear-gradient(90deg, #ff2bd6, transparent); transform: skewX(-24deg); transform-origin: bottom left; box-shadow: none; position: absolute; left: -6px; top: 0; opacity: .55; z-index: -1; }
+#bsRoot.st-cyber .bs-ptitle { padding-left: 14px; text-shadow: 0 0 10px #ff2bd6; }
+#bsRoot.st-cyber .p-kpi { padding: 10px 18px !important; }
+#bsRoot.st-cyber .p-kpi .bs-ptitle { display: none; }
+#bsRoot.st-cyber .bs-head::before { left: 0; right: auto; width: 820px; clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%); background: linear-gradient(90deg, rgba(255,43,214,.35), rgba(0,240,255,.05)); border-bottom: 2px solid #00f0ff; }
+#bsRoot.st-cyber .bs-title { left: 150px; transform: none; font-style: italic; letter-spacing: 4px; font-size: 38px; }
+@keyframes bsGlitchL { 0%, 92%, 100% { transform: none; } 93% { transform: translateX(3px) skewX(-8deg); } 95% { transform: translateX(-4px); } 97% { transform: translateX(2px) skewX(5deg); } }
+#bsRoot.st-cyber .bs-title { animation: bsGlitchL 6s infinite; }
+#bsRoot.st-cyber .bs-sub { left: 152px; transform: none; top: 62px; }
+#bsRoot.st-cyber .bs-head > div:first-child { position: absolute; right: 460px; text-align: right; }
+.bs-hud { display: flex; gap: 0; height: 100%; align-items: stretch; }
+.bs-hud .hk { flex: 1; position: relative; padding: 4px 16px; border-right: 1px solid rgba(0,240,255,.25); transform: skewX(-12deg); }
+.bs-hud .hk > * { transform: skewX(12deg); }
+.bs-hud .hk > span { display: block; font-size: 12px; letter-spacing: 3px; color: #00f0ff; text-transform: uppercase; }
+.bs-hud .hk b { display: block; font-size: 34px; font-family: var(--bs-font-num); color: #fff; text-shadow: 0 0 12px #ff2bd6; line-height: 1.15; white-space: nowrap; }
+.bs-hud .hk b em { font-size: 15px; font-style: normal; color: #b28bdc; }
+.bs-hud .hk i { position: absolute; left: 16px; right: 16px; bottom: 4px; height: 3px; background: rgba(0,240,255,.15); }
+.bs-hud .hk i u { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #00f0ff, #ff2bd6); box-shadow: 0 0 8px #ff2bd6; }
+.bs-hud .hk.bad b { color: #ff3860; text-shadow: 0 0 14px #ff3860; }
+/* 终端日志式告警(赛博 / 雷达共用) */
+.bs-term { font-family: Consolas, "Cascadia Mono", monospace; font-size: 13.5px; line-height: 1.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px dotted rgba(255,255,255,.08); }
+.bs-term .ts { color: var(--bs-dim); } .bs-term .lv { font-weight: 700; padding: 0 4px; }
+.bs-term.critical .lv { color: #0b0b0b; background: var(--bs-hot); } .bs-term.warning .lv { color: var(--bs-warn); }
+.bs-term .dv { color: var(--bs-accent); } .bs-term.new { animation: bsTermNew 1s steps(2) 4; }
+@keyframes bsTermNew { 50% { background: color-mix(in srgb, var(--bs-hot) 30%, transparent); } }
+
+/* ================= 极光: 便当格 + 玻璃卡片 ================= */
+#bsRoot.st-aurora .bs-body { grid-template-columns: 1.45fr 1fr 1fr; grid-template-rows: 190px 1fr 1fr 240px; gap: 20px;
+  grid-template-areas: "map kpi kpi" "map risk feed" "map hot feed" "trend cats apps"; }
+#bsRoot.st-aurora .bs-panel { border-radius: 22px; border: 1px solid rgba(167,243,208,.18); background: linear-gradient(160deg, rgba(20,83,74,.42), rgba(6,24,30,.55));
+  box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12); overflow: hidden; }
+#bsRoot.st-aurora .bs-panel::before, #bsRoot.st-aurora .bs-panel::after { display: none; }
+#bsRoot.st-aurora .bs-ptitle { background: none; border: 0; font-weight: 500; letter-spacing: 1px; padding-left: 22px; top: 6px; font-size: 16px; }
+#bsRoot.st-aurora .bs-ptitle::before { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px var(--bs-accent); }
+#bsRoot.st-aurora .p-kpi { padding: 16px !important; }
+#bsRoot.st-aurora .p-kpi .bs-ptitle { display: none; }
+#bsRoot.st-aurora .bs-head::before { display: none; }
+#bsRoot.st-aurora .bs-head::after { left: 32px; right: 32px; background: linear-gradient(90deg, rgba(52,211,153,.6), rgba(192,132,252,.4), transparent); }
+#bsRoot.st-aurora .bs-title { left: 32px; transform: none; font-weight: 300; letter-spacing: 6px; font-size: 42px; filter: none; }
+#bsRoot.st-aurora .bs-title::after { display: none; }
+#bsRoot.st-aurora .bs-sub { left: 36px; transform: none; top: 66px; }
+#bsRoot.st-aurora .bs-head > div:first-child { position: absolute; right: 360px; text-align: right; }
+#bsRoot.st-aurora .bs-row { border-bottom-style: solid; border-bottom-color: rgba(255,255,255,.06); }
+#bsRoot.st-aurora .bs-bar, #bsRoot.st-aurora .bs-bar i { border-radius: 6px; }
+#bsRoot.st-aurora .bs-alert { border-radius: 12px; border-left-width: 0; box-shadow: inset 4px 0 0 var(--bs-warn); }
+#bsRoot.st-aurora .bs-alert.critical { box-shadow: inset 4px 0 0 var(--bs-hot); }
+.bs-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; height: 100%; }
+.bs-tile { border-radius: 16px; padding: 14px 18px; background: rgba(255,255,255,.05); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.bs-tile > span { font-size: 14px; color: var(--bs-dim); }
+.bs-tile b { font-size: 46px; font-weight: 300; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; color: var(--bs-strong); line-height: 1; }
+.bs-tile b em { font-size: 18px; font-style: normal; color: var(--bs-dim); margin-left: 4px; }
+.bs-tile small { font-size: 12.5px; color: var(--bs-dim); }
+.bs-tile .pb { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.bs-tile .pb u { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #34d399, #c084fc); }
+.bs-tile::after { content: ""; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(192,132,252,.25), transparent 70%); }
+.bs-tile.bad b { color: #fb7185; }
+
+/* ================= 指挥中心·黑金 ================= */
+#bsRoot.st-gold .bs-body { grid-template-columns: 430px 1fr 1fr 430px; grid-template-rows: 140px 1fr 270px;
+  grid-template-areas: "kpi kpi kpi kpi" "risk map map feed" "hot trend cats apps"; }
+#bsRoot.st-gold .bs-panel { background: linear-gradient(180deg, rgba(40,30,12,.8), rgba(12,9,4,.9)); border: 1px solid rgba(245,196,81,.55); outline: 1px solid rgba(245,196,81,.18); outline-offset: 4px; }
+#bsRoot.st-gold .bs-panel::before, #bsRoot.st-gold .bs-panel::after { width: 10px; height: 10px; border: 0; background: #f5c451; transform: rotate(45deg); }
+#bsRoot.st-gold .bs-panel::before { left: -6px; top: -6px; } #bsRoot.st-gold .bs-panel::after { right: -6px; bottom: -6px; }
+#bsRoot.st-gold .bs-ptitle { justify-content: center; padding-left: 0; background: linear-gradient(90deg, transparent, rgba(245,196,81,.2), transparent); font-family: "SimSun", "Songti SC", Georgia, serif; letter-spacing: 6px; color: #fde68a; }
+#bsRoot.st-gold .bs-ptitle::before { content: "◆ ━━"; width: auto; height: auto; background: none; box-shadow: none; color: #f5c451; font-size: 11px; letter-spacing: 0; }
+#bsRoot.st-gold .bs-ptitle::after { content: "━━ ◆"; color: #f5c451; font-size: 11px; margin-left: 10px; letter-spacing: 0; }
+#bsRoot.st-gold .bs-ptitle small, #bsRoot.st-gold .bs-ptitle .r { display: none; }
+#bsRoot.st-gold .p-kpi { padding: 12px 16px !important; }
+#bsRoot.st-gold .p-kpi .bs-ptitle { display: none; }
+#bsRoot.st-gold .bs-title { font-family: "SimSun", "Songti SC", Georgia, serif; letter-spacing: 14px; }
+#bsRoot.st-gold .bs-head::before { left: 520px; right: 520px; clip-path: polygon(0 0, 100% 0, 96% 100%, 4% 100%); background: linear-gradient(180deg, rgba(245,196,81,.28), rgba(245,196,81,.02)); border-bottom: 2px solid #f5c451; }
+#bsRoot.st-gold .bs-sub::before { content: "━━━◆  "; color: #f5c451; } #bsRoot.st-gold .bs-sub::after { content: "  ◆━━━"; color: #f5c451; }
+.bs-plates { display: grid; grid-template-columns: repeat(6, 1fr); height: 100%; }
+.bs-plate { text-align: center; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(245,196,81,.25); position: relative; }
+.bs-plate:last-child { border-right: 0; }
+.bs-plate > span { font-size: 13px; letter-spacing: 4px; color: #bfa56a; }
+.bs-plate b { font-size: 48px; font-family: Georgia, "Times New Roman", serif; font-weight: 400; line-height: 1.15;
+  background: linear-gradient(180deg, #fffbeb, #f5c451 55%, #a16207); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bs-plate b em { font-size: 20px; font-style: normal; }
+.bs-plate small { font-size: 12px; color: #bfa56a; }
+.bs-plate.bad b { background: linear-gradient(180deg, #fecaca, #ef4444); -webkit-background-clip: text; background-clip: text; }
+
+/* ================= 军绿雷达: 雷达屏 + 终端读数 ================= */
+#bsRoot.st-mono .bs-body { grid-template-columns: 420px 1fr 420px; grid-template-rows: auto 1fr 1fr 210px;
+  grid-template-areas: "kpi map feed" "risk map feed" "cats map hot" "trend trend apps"; }
+#bsRoot.st-mono .bs-panel { background: rgba(2,18,6,.85); border: 1px solid #1f7a37; box-shadow: inset 0 0 40px rgba(74,222,128,.07); padding-top: 38px; }
+#bsRoot.st-mono .bs-panel::before, #bsRoot.st-mono .bs-panel::after { display: none; }
+#bsRoot.st-mono .bs-ptitle { background: none; border-bottom: 1px dashed #1f7a37; height: 28px; font-size: 14px; letter-spacing: 1px; padding-left: 8px; color: #86efac; text-transform: uppercase; }
+#bsRoot.st-mono .bs-ptitle::before { content: "[+]"; width: auto; height: auto; background: none; box-shadow: none; color: #4ade80; margin-right: 8px; }
+#bsRoot.st-mono .bs-row { border-bottom: 0; padding: 3px 2px; font-size: 13.5px; }
+#bsRoot.st-mono .bs-row::before { content: ">"; color: #4ade80; margin-right: -2px; }
+#bsRoot.st-mono .bs-rank { background: none; color: #86efac; width: 16px; }
+#bsRoot.st-mono .bs-bar { height: 10px; background: repeating-linear-gradient(90deg, rgba(74,222,128,.14) 0 6px, transparent 6px 8px); }
+#bsRoot.st-mono .bs-bar i { background: repeating-linear-gradient(90deg, #4ade80 0 6px, transparent 6px 8px); box-shadow: none; }
+#bsRoot.st-mono .bs-bar i.hot { background: repeating-linear-gradient(90deg, #facc15 0 6px, transparent 6px 8px); }
+#bsRoot.st-mono .bs-head::before { display: none; }
+#bsRoot.st-mono .bs-head::after { background: repeating-linear-gradient(90deg, #4ade80 0 8px, transparent 8px 12px); opacity: .5; }
+#bsRoot.st-mono .bs-title { left: 32px; transform: none; font-size: 30px; letter-spacing: 2px; filter: none; background: none; color: #4ade80; text-shadow: 0 0 10px #4ade80; }
+#bsRoot.st-mono .bs-title::before { content: "root@netmon:~$ "; color: #86efac; font-weight: 400; }
+#bsRoot.st-mono .bs-title::after { content: "_"; position: static; background: none; color: #4ade80; animation: bsCursor 1s steps(2) infinite; }
+@keyframes bsCursor { 50% { opacity: 0; } }
+#bsRoot.st-mono .bs-sub { left: 34px; transform: none; top: 60px; }
+#bsRoot.st-mono .bs-head > div:first-child { position: absolute; right: 360px; text-align: right; }
+#bsRoot.st-mono .bs-clock::before { content: "["; } #bsRoot.st-mono .bs-clock::after { content: "]"; }
+#bsRoot.st-mono .p-map { background: rgba(0,10,3,.9); }
+.bs-readout { font-family: Consolas, "Cascadia Mono", monospace; font-size: 15px; line-height: 1.9; color: #bbf7d0; }
+.bs-readout div { display: flex; gap: 8px; white-space: nowrap; }
+.bs-readout .k { color: #4ade80; } .bs-readout .dots { flex: 1; overflow: hidden; color: #166534; }
+.bs-readout .v { color: #f7fee7; text-shadow: 0 0 8px #4ade80; font-weight: 700; }
+.bs-readout .g { color: #4ade80; letter-spacing: -1px; } .bs-readout .bad .v { color: #fca5a5; text-shadow: 0 0 8px #f87171; }
+
+/* ================= 红色警戒: 事件处置模式 ================= */
+#bsRoot.st-redalert .bs-body { grid-template-columns: 780px 1fr 420px; grid-template-rows: 190px 1fr 1fr 230px;
+  grid-template-areas: "kpi kpi risk" "feed map risk" "feed map cats" "feed trend hot"; }
+#bsRoot.st-redalert .p-apps { display: none; }
+#bsRoot.st-redalert .bs-panel { background: linear-gradient(180deg, rgba(60,6,8,.78), rgba(18,2,3,.9)); border: 1px solid rgba(248,113,113,.45); padding-top: 46px; }
+#bsRoot.st-redalert .bs-panel::before { width: auto; height: 6px; left: 0; right: 0; top: 0; border: 0; background: repeating-linear-gradient(-45deg, #facc15 0 12px, #111 12px 24px); }
+#bsRoot.st-redalert .bs-panel::after { display: none; }
+#bsRoot.st-redalert .bs-ptitle { top: 6px; background: linear-gradient(90deg, #b91c1c, rgba(185,28,28,.15)); color: #fff; border: 0; }
+#bsRoot.st-redalert .bs-ptitle::before { background: #fff; box-shadow: none; }
+#bsRoot.st-redalert .p-kpi { padding: 16px 22px 14px !important; }
+#bsRoot.st-redalert .p-kpi .bs-ptitle { display: none; }
+#bsRoot.st-redalert .p-feed .bs-alert { font-size: 17px; padding: 12px 14px 12px 18px; border-left-width: 6px; margin-bottom: 10px; }
+#bsRoot.st-redalert .p-feed .bs-alert .t { font-size: 14px; }
+#bsRoot.st-redalert .p-feed .bs-alert .dev { font-size: 20px; font-weight: 800; color: #fff; margin-right: 8px; }
+#bsRoot.st-redalert .bs-head::before { left: 0; right: 0; clip-path: none; height: 86px; background: linear-gradient(180deg, rgba(185,28,28,.55), rgba(185,28,28,.08)); border-bottom: 3px solid #ef4444; }
+#bsRoot.st-redalert .bs-title::before { content: "⚠ "; }
+#bsRoot.st-redalert .bs-title::after { display: none; }
+.bs-incident { display: grid; grid-template-columns: 300px 1fr 1fr 1.6fr; gap: 20px; height: 100%; align-items: center; }
+.bs-incident .big { text-align: center; }
+.bs-incident .big b { display: block; font-size: 110px; line-height: .95; font-family: var(--bs-font-num); color: #ff2d2d; text-shadow: 0 0 30px rgba(255,45,45,.8); }
+.bs-incident .big.calm b { color: #fda4af; text-shadow: none; }
+.bs-incident .big.flash b { animation: bsFlash 1s steps(2) infinite; }
+@keyframes bsFlash { 50% { opacity: .35; } }
+.bs-incident .big > span, .bs-incident .sm > span { font-size: 15px; letter-spacing: 4px; color: #fecaca; }
+.bs-incident .sm b { display: block; font-size: 54px; font-family: var(--bs-font-num); color: #fff; line-height: 1.1; }
+.bs-incident .sm small { color: #d58f8f; font-size: 13px; }
+.bs-incident .last { border-left: 3px solid #ef4444; padding-left: 16px; }
+.bs-incident .last .st { display: inline-block; font-size: 18px; font-weight: 800; letter-spacing: 3px; padding: 4px 12px; background: #b91c1c; color: #fff; margin-bottom: 8px; }
+.bs-incident .last .st.calm { background: #14532d; }
+.bs-incident .last div { font-size: 17px; color: #fee2e2; line-height: 1.6; max-height: 82px; overflow: hidden; }

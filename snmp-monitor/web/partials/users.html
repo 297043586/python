@@ -1,0 +1,23 @@
+<div class="modal-overlay" id="usersModal">
+  <div class="modal-content" style="max-width:1180px;">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">👥 账号权限</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">管理员拥有全部权限, 并且只有管理员能管理账号。子账号只能做勾选了的那几类操作。未登录的游客能看哪些页面在下面「游客访问」里设置。改动立即生效, 停用账号或重置口令会让它当前的登录失效。</div>
+      </div>
+      <button class="modal-close" onclick="closeUsers()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="usr-guest" id="usrGuest"></div>
+      <div class="usr-wrap">
+        <div>
+          <div class="table-toolbar" style="margin-bottom:8px;"><span id="usrCount" style="font-size:13px;color:var(--fg-dim);"></span>
+            <button class="hbtn" onclick="usrEdit(null)">＋ 新建账号</button></div>
+          <div style="overflow:auto;max-height:64vh;"><table class="usr-table"><thead><tr><th>用户名</th><th>角色 / 权限</th><th>状态</th><th>最近登录</th><th>备注</th><th></th></tr></thead><tbody id="usrBody"></tbody></table></div>
+        </div>
+        <div class="usr-form" id="usrForm"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ui-toast" id="uiToast"></div>

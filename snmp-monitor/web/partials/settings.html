@@ -1,0 +1,23 @@
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">🛠️ 系统设置</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="setFile">config.json 里的所有设置 + 页面显示参数。保存后写回 config.json(自动备份为 config.json.bak), 大部分立即生效。</div>
+      </div>
+      <button class="modal-close" onclick="closeSettings()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="set-wrap">
+        <div class="set-nav" id="setNav"></div>
+        <div class="set-body" id="setBody"><div class="empty">加载中...</div></div>
+      </div>
+      <div class="set-foot">
+        <span class="set-msg" id="setMsg"></span>
+        <button class="filter-btn" onclick="settingsResetSection()">↺ 本页恢复默认</button>
+        <button class="filter-btn" onclick="loadSettings()">放弃修改</button>
+        <button class="hbtn" onclick="saveSettings()">💾 保存设置</button>
+      </div>
+    </div>
+  </div>
+</div>

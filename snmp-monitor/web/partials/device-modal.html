@@ -1,0 +1,392 @@
+<div class="modal-overlay" id="devModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle" style="margin:0;font-size:18px;">设备全量健康详情</h2>
+        <div id="modalSub" style="font-size:12px;color:var(--fg-dim);margin-top:4px;"></div>
+      </div>
+      <div class="tb">
+        <button class="btn sm" id="devBackBtn" onclick="devBack()" style="display:none;"></button>
+        <button class="btn sm" id="devRefreshBtn" onclick="refreshCurrentDevice()" data-auth title="不用等下一轮全网巡检, 马上只对这台设备重新采集一次">⚡ 立即巡检</button>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="0" onclick="switchTab(0)">📋 硬件</button>
+        <button class="tab-btn" data-tab="1" onclick="switchTab(1)">🔌 端口 &amp; LLDP (<span id="portCount">0</span>)</button>
+        <button class="tab-btn" data-tab="2" data-view="hosts" onclick="switchTab(2)">🌐 ARP 表 (<span id="arpCount">0</span>)</button>
+        <button class="tab-btn" data-tab="7" onclick="switchTab(7)">🧩 聚合口 (<span id="aggCount">0</span>)</button>
+        <button class="tab-btn" data-tab="3" onclick="switchTab(3)">📈 性能趋势</button>
+        <button class="tab-btn" data-tab="4" onclick="switchTab(4)">⚠️ 告警 (<span id="alertCount">0</span>)</button>
+        <button class="tab-btn" data-tab="5" onclick="switchTab(5)">🔎 诊断/耗时</button>
+        <button class="tab-btn" data-tab="6" data-view="flows" onclick="switchTab(6)">📝 设备日志</button>
+        <button class="tab-btn" data-tab="8" data-view="flows" onclick="switchTab(8)">📊 流量</button>
+        <button class="tab-btn" data-tab="9" data-view="racks" onclick="switchTab(9)">🗄️ 面板</button>
+        <button class="tab-btn" data-tab="10" data-view="hosts" onclick="switchTab(10)">VLANIF / 三层接口 (<span id="vlanIfCount">0</span>)</button>
+        <button class="tab-btn" data-tab="11" data-view="hosts" onclick="switchTab(11)">MAC 转发表 (<span id="fdbCount">0</span>)</button>
+        <button class="tab-btn" data-tab="12" data-view="hosts" onclick="switchTab(12)">路由表 (<span id="routeCount">0</span>)</button>
+      </div>
+
+      <div class="tab-content active" id="tab0">
+        <div class="hw-grid">
+          <div class="hw-item"><h4>电源模块</h4><div class="val" id="hwPower">-</div></div>
+          <div class="hw-item"><h4>风扇模块</h4><div class="val" id="hwFan">-</div></div>
+          <div class="hw-item"><h4>板卡温度</h4><div class="val" id="hwTemp">-</div></div>
+          <div class="hw-item"><h4>物理口接入率</h4><div class="val" style="color:var(--accent);" id="hwRatio">-</div></div>
+        </div>
+        <div class="hw-grid">
+          <div class="hw-item"><h4>物理口总数</h4><div class="val" id="hwTotal">-</div></div>
+          <div class="hw-item"><h4>在线 (UP)</h4><div class="val" style="color:var(--good);" id="hwUp">-</div></div>
+          <div class="hw-item"><h4>空闲 (DOWN)</h4><div class="val" style="color:var(--fg-faint);" id="hwDown">-</div></div>
+          <div class="hw-item"><h4>连续运行</h4><div class="val" style="font-size:15px;" id="hwUptime">-</div></div>
+        </div>
+        <div class="hw-grid">
+          <div class="hw-item"><h4>厂商 / 识别结果</h4><div class="val" style="font-size:14px;" id="hwBrand">-</div></div>
+          <div class="hw-item"><h4>CPU</h4><div class="val" id="hwCpu">-</div></div>
+          <div class="hw-item"><h4>内存</h4><div class="val" id="hwMem">-</div></div>
+          <div class="hw-item"><h4>本轮采集耗时</h4><div class="val" id="hwCost">-</div></div>
+        </div>
+        <div class="hw-item"><h4>系统描述 (sysDescr)</h4><div class="val" style="font-size:13px;font-weight:400;" id="hwDescr">-</div></div>
+        <div class="hw-item" style="margin-top:14px;"><h4>本设备采集范围</h4><div class="val" style="font-size:13px;font-weight:400;" id="hwCollect">-</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px;">
+          <div class="chart-title" style="margin:0;">资产信息 &amp; 端口健康摘要</div>
+          <label style="font-size:13px;color:var(--fg-dim);cursor:pointer;" title="同时控制端口表里的扩展列; 采集开关在「设备管理」里">
+            <input type="checkbox" id="hwExtToggle" onchange="togglePortExt(this.checked)"> 显示扩展信息
+          </label>
+        </div>
+        <div id="hwExtBox"></div>
+      </div>
+
+      <div class="tab-content" id="tab1">
+        <div class="table-toolbar">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="portSearch" placeholder="搜索端口名 / 描述 / LLDP 对端..." onkeyup="renderPorts()">
+            <button class="filter-btn pf-btn active" data-f="ALL" onclick="setFilter('ALL',this)" title="清除所有条件">全部</button>
+            <button class="filter-btn pf-btn" data-f="UP" onclick="setFilter('UP',this)">UP</button>
+            <button class="filter-btn pf-btn" data-f="DOWN" onclick="setFilter('DOWN',this)">DOWN</button>
+            <button class="filter-btn pf-btn" data-f="OPT" onclick="setFilter('OPT',this)">光口</button>
+            <button class="filter-btn pf-btn" data-f="UPLINK" onclick="setFilter('UPLINK',this)">上联口</button>
+            <button class="filter-btn pf-btn" data-f="AGG" onclick="setFilter('AGG',this)">聚合成员</button>
+            <button class="filter-btn pf-btn" data-f="PROB" onclick="setFilter('PROB',this)" title="错包 / 丢包 / 半双工 / 收光偏弱">有问题</button>
+            <button class="filter-btn pf-btn" data-f="BUSY" onclick="setFilter('BUSY',this)" title="入或出利用率 ≥ 70%">高负载</button>
+            <span style="font-size:12px;color:var(--fg-faint);" title="UP 和 DOWN 同时选 = 两种都显示; 其余条件同时选 = 必须同时满足">(可多选)</span>
+            <label style="font-size:13px;color:var(--fg-dim);cursor:pointer;" title="丢包/广播组播/MAC 数/双工/状态持续时间; 采集开关在「设备管理」里">
+              <input type="checkbox" id="portExtToggle" onchange="togglePortExt(this.checked)"> 显示扩展列
+            </label>
+            <label data-auth style="font-size:13px;color:var(--fg-dim);cursor:pointer;" title="表里的速率默认是两轮巡检之间的平均值; 打开后每 5 秒单独读一次这台设备的端口计数器, 显示接近实时的速率(只在窗口开着时轮询)">
+              <input type="checkbox" id="portLiveToggle" onchange="togglePortLive(this.checked)"> ⚡ 实时速率 <span id="portLiveStat" class="sub2" style="display:inline;"></span>
+            </label>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="filter-btn" onclick="resetColumnWidths('portsTable')" title="列宽拖乱了可以一键恢复自动宽度">↺ 重置列宽</button>
+            <button class="export-btn" onclick="exportCSV()">📥 导出端口 CSV</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--fg-faint);margin-bottom:6px;">💡 点击端口名可跳转到「IP-MAC-端口」标签页; 描述/VLAN 太长时悬停可看全文。拖拽表头右边缘可调整列宽, 拖窄后文字自动换行不再重叠。</div>
+        <div style="max-height:56vh;overflow:auto;">
+          <table id="portsTable">
+            <thead><tr>
+              <th onclick="sortBy('name')">物理接口 <span class="sort-icon" id="ic-name">↕</span> <span style="font-weight:400;color:var(--fg-faint);">(含描述/VLAN)</span></th>
+              <th onclick="sortBy('status')">状态 <span class="sort-icon" id="ic-status">↕</span></th>
+              <th onclick="sortBy('speed')" title="下方小字是双工模式, 悬停可看数据来源">速率/双工 <span class="sort-icon" id="ic-speed">↕</span></th>
+              <th onclick="sortBy('lldp')">LLDP 邻居对端 <span class="sort-icon" id="ic-lldp">↕</span></th>
+              <th onclick="sortBy('rx')">收光 Rx <span class="sort-icon" id="ic-rx">↕</span></th>
+              <th onclick="sortBy('tx')">发光 Tx <span class="sort-icon" id="ic-tx">↕</span></th>
+              <th onclick="sortBy('in')">入向利用率 <span class="sort-icon" id="ic-in">↕</span></th>
+              <th onclick="sortBy('out')">出向利用率 <span class="sort-icon" id="ic-out">↕</span></th>
+              <th onclick="sortBy('err')">增量错包 <span class="sort-icon" id="ic-err">↕</span></th>
+              <th class="col-ext" onclick="sortBy('disc')" title="本轮入/出方向丢包增量; 出方向丢包是拥塞的直接证据">丢包 入/出 <span class="sort-icon" id="ic-disc">↕</span></th>
+              <th class="col-ext" onclick="sortBy('bcast')" title="入方向每秒广播/组播包数, 广播突增是环路/广播风暴的典型信号">广播/组播 pps <span class="sort-icon" id="ic-bcast">↕</span></th>
+              <th class="col-ext" onclick="sortBy('mac')">MAC 数 <span class="sort-icon" id="ic-mac">↕</span></th>
+              <th class="col-ext" onclick="sortBy('change')" title="距上次 UP/DOWN 变化多久, 很短说明端口在抖动">状态持续 <span class="sort-icon" id="ic-change">↕</span></th>
+            </tr></thead>
+            <tbody id="portBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab2">
+        <label style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--fg-dim);margin:0 0 8px;cursor:pointer;" title="默认只显示本机 SNMP ARP 表记录；勾选后额外显示跨设备关联推断记录">
+          <input type="checkbox" id="arpIncludeRelated" onchange="renderHosts()"> 包含跨设备关联记录
+        </label>
+        <div class="table-toolbar">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="arpSearch" placeholder="搜索 IP / MAC / 端口 (如 0/1)..." title="MAC 搜索不区分大小写，支持冒号、点号、短横线或不带分隔符" onkeyup="renderHosts()">
+            <div class="ms" id="arpPortFilter" data-all="全部端口" data-label="端口" data-change="renderHosts"></div>
+            <div class="ms" id="arpKindFilter" data-all="全部定位结果" data-label="定位" data-change="renderHosts"></div>
+            <div class="ms" id="arpVlanFilter" data-all="全部 VLAN" data-label="VLAN" data-change="renderHosts"></div>
+            <button class="filter-btn" id="arpPortClear" style="display:none;" onclick="msClearAll(['arpPortFilter','arpKindFilter','arpVlanFilter']);renderHosts();">✕ 清除筛选</button>
+          </div>
+          <span style="font-size:12px;color:var(--fg-dim);">蓝色「上联/级联口」表示该口后面还挂着交换机; VLAN 号灰色表示是猜测值不是精确值</span>
+        </div>
+        <div style="max-height:56vh;overflow:auto;">
+          <table id="arpTable">
+            <thead><tr>
+              <th>IP 地址</th><th>MAC 地址</th><th>VLAN</th>
+              <th>所属三层接口</th>
+              <th style="color:var(--accent);">具体接入端口 / 链路</th>
+            </tr></thead>
+            <tbody id="arpBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab10">
+        <div class="table-toolbar">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="vlanIfSearch" placeholder="搜索接口或 IP…" oninput="renderVlanIfTable()">
+            <span id="vlanIfSummary" style="font-size:12px;color:var(--fg-dim);"></span>
+          </div>
+          <span style="font-size:12px;color:var(--fg-faint);">显示 SNMP 识别到的三层接口地址，包含 VLANIF/SVI、管理口和环回口。</span>
+        </div>
+        <div style="max-height:56vh;overflow:auto;">
+          <table id="vlanIfTable">
+            <thead><tr><th>三层接口 / VLANIF</th><th>当前状态</th><th>IP 地址</th><th>额外 IP 地址</th></tr></thead>
+            <tbody id="vlanIfBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab11">
+        <div class="table-toolbar">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="fdbSearch" placeholder="搜索 MAC / VLAN / 接口…" title="MAC 搜索不区分大小写，支持冒号、点号、短横线或不带分隔符" oninput="renderFDBTable()">
+            <select id="fdbVlanFilter" onchange="renderFDBTable()" style="padding:8px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--fg);"><option value="">全部 VLAN</option></select>
+            <span id="fdbSummary" style="font-size:12px;color:var(--fg-dim);"></span>
+          </div>
+          <span style="font-size:12px;color:var(--fg-faint);">按 VLAN + MAC 显示二层转发表项；SNMP 来源与采集行数会显示在左侧。</span>
+        </div>
+        <div style="max-height:56vh;overflow:auto;">
+          <table id="fdbTable">
+            <thead><tr><th>MAC 地址</th><th>VLAN</th><th>转发端口</th><th>端口角色 / 位置</th></tr></thead>
+            <tbody id="fdbBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab12">
+        <div class="table-toolbar">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" class="search-box" id="routeSearch" placeholder="搜索目的网段 / 下一跳 / 接口 / 协议…" oninput="renderRouteTable()">
+            <span id="routeSummary" style="font-size:12px;color:var(--fg-dim);"></span>
+            <button class="filter-btn" id="routeReload" onclick="loadDeviceRoutes(currentDetail, true)">↻ 刷新路由表</button>
+          </div>
+          <span style="font-size:12px;color:var(--fg-faint);">首次切换到此页时读取并保存；以后显示缓存，点击“刷新路由表”获取最新数据。</span>
+        </div>
+        <div style="max-height:56vh;overflow:auto;">
+          <table id="routeTable">
+            <thead><tr><th>目的网段</th><th>下一跳</th><th>出接口</th><th>协议</th><th>类型</th><th>Metric</th><th>路由年龄</th></tr></thead>
+            <tbody id="routeBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab3">
+        <div style="font-size:12.5px;color:var(--fg-dim);margin-bottom:10px;">把鼠标移到曲线上可以看到该时刻的具体数值。历史数据会落盘, 重启程序不会丢。</div>
+        <div class="chart-container"><div class="chart-title">📊 CPU 占用率 (%)</div><canvas id="cpuCanvas" class="trend-canvas"></canvas><div class="tip" id="tip-cpuCanvas"></div></div>
+        <div class="chart-container"><div class="chart-title">🧠 内存使用率 (%)</div><canvas id="memCanvas" class="trend-canvas"></canvas><div class="tip" id="tip-memCanvas"></div></div>
+        <div class="chart-container"><div class="chart-title">👥 已学习 MAC 地址数</div><canvas id="macCanvas" class="trend-canvas"></canvas><div class="tip" id="tip-macCanvas"></div></div>
+        <div class="chart-container"><div class="chart-title">📶 整机吞吐 (Mbps, 蓝=入 绿=出)</div><canvas id="bwCanvas" class="trend-canvas"></canvas><div class="tip" id="tip-bwCanvas"></div></div>
+      </div>
+
+      <div class="tab-content" id="tab4">
+        <div class="table-toolbar">
+          <label style="font-size:13px;color:var(--fg-dim);cursor:pointer;">
+            <input type="checkbox" id="hideAcked" onchange="renderAlerts()"> 隐藏已确认 / 已关闭
+          </label>
+          <span style="font-size:12px;color:var(--fg-dim);">「确认」= 已知悉但仍显示; 「关闭」= 隐藏, 故障恢复后再次发生会重新提醒(需要登录)</span>
+          <button class="btn sm" onclick="var ip=currentIP;closeModal();openAlertCenter('hist',{device:ip})">📜 这台设备的历史告警</button>
+        </div>
+        <div id="alertList"></div>
+      </div>
+
+      <div class="tab-content" id="tab5">
+        <div id="diagList"></div>
+        <div class="chart-title" style="margin:14px 0 8px;">各阶段耗时 (定位采集慢在哪一步)</div>
+        <table><thead><tr><th style="cursor:default;">阶段</th><th style="cursor:default;">耗时</th></tr></thead><tbody id="phaseBody"></tbody></table>
+        <div class="chart-title" style="margin:16px 0 8px;">巡检摘要</div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+
+      <div class="tab-content" id="tab6">
+        <div style="font-size:12.5px;color:var(--fg-dim);margin-bottom:10px;" id="syslogHint">
+          SNMP 本身查不到这三家交换机的历史日志(没有可靠的标准 MIB 表可读)。这里用 syslog 协议接收交换机主动推送的日志——
+          在交换机上执行 <code>info-center loghost 本机IP</code>(华为/H3C)或 <code>logging host 本机IP</code>(锐捷)风格的命令, 指向这台服务器即可。
+        </div>
+        <div class="tb" style="margin-bottom:8px;" data-auth>
+          <button class="btn sm" onclick="openPush({ kind: 'syslog', ips: [currentIP] })" title="用配置备份里的登录凭据, 给这台设备下发 loghost 配置">🛠️ 一键下发 syslog 配置</button>
+          <button class="btn sm" onclick="pushFetchDeviceLog()" title="SSH/Telnet 登录设备执行 display logbuffer / show logging, 不改配置">📥 从设备读取本地日志缓冲区</button>
+        </div>
+        <div class="log-box" id="syslogBox">未加载</div>
+        <div class="log-box" id="devLogBufBox" style="display:none;margin-top:10px;"></div>
+      </div>
+
+      <div class="tab-content" id="tab7">
+        <div style="font-size:12.5px;color:var(--fg-dim);margin-bottom:10px;">
+          每个聚合组: 模式(LACP/静态)、汇总带宽与利用率、VLAN、对端设备与对端聚合口, 以及每个成员口的状态/速率/LACP 协商/对端端口。
+          「对端聚合口」要求对端设备也在本平台监控中。黄色提示是自动一致性检查(成员 DOWN、速率不一致、负载不均、两端不对称等)。
+        </div>
+        <div id="aggList"></div>
+      </div>
+
+      <div class="tab-content" id="tab9">
+        <div class="pnl-wrap" id="panelWrap"><div id="panelBox"></div><div class="tip" id="panelTip"></div></div>
+      </div>
+
+      <div class="tab-content" id="tab8">
+        <div class="table-toolbar">
+          <div style="font-size:12.5px;color:var(--fg-dim);flex:1;min-width:260px;" id="flowHint">
+            NetFlow v5 / sFlow v5 接收——在交换机/路由器上把流量导出目标指向本机对应端口即可。只看这台设备上报的数据。
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <select id="flowWindow" onchange="loadFlows()" style="padding:8px 10px;border-radius:8px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--fg);">
+              <option value="60">最近 1 分钟</option>
+              <option value="300" selected>最近 5 分钟</option>
+              <option value="900">最近 15 分钟</option>
+              <option value="1800">最近 30 分钟</option>
+              <option value="0">缓冲区全部</option>
+            </select>
+            <label style="font-size:13px;color:var(--fg-dim);cursor:pointer;"><input type="checkbox" id="flowAuto" onchange="toggleFlowAuto(this.checked)"> 每 10 秒刷新</label>
+            <label style="font-size:13px;color:var(--fg-dim);cursor:pointer;" title="从 sFlow 报文头里解析 DNS 查询域名 / HTTPS 的 TLS SNI / HTTP Host。涉及访问记录, 有合规要求时可以关掉(需要登录, 全局生效)">
+              <input type="checkbox" id="flowL7" onchange="setFlowL7(this.checked)"> L7 域名解析
+            </label>
+            <button class="export-btn" onclick="loadFlows()">⟳ 刷新</button>
+          </div>
+        </div>
+        <div id="flowSummary" class="kv-grid"></div>
+
+        <div class="flow-section">
+          <div class="chart-title" style="margin:6px 0 8px;">流量趋势 (10 秒粒度; sFlow/抽样 NetFlow 已按抽样率折算, 是估算值)</div>
+          <div id="flowTimeline"></div>
+        </div>
+        <div id="flowDirBox" class="flow-section"></div>
+
+        <div class="flow-cols">
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">应用识别 Top <span style="font-weight:400;font-size:12px;color:var(--fg-dim);">(域名归属 &gt; 报文特征 &gt; 知名端口; 悬停看类别)</span></div>
+            <div class="flow-scroll">
+              <table>
+                <thead><tr><th style="cursor:default;">应用</th><th style="cursor:default;">类别</th><th style="cursor:default;">终端数</th><th style="cursor:default;">样本</th><th style="cursor:default;">流量</th></tr></thead>
+                <tbody id="flowAppBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div style="max-width:340px;min-width:260px;">
+            <div class="chart-title" style="margin:6px 0 8px;">应用类别占比</div>
+            <div id="flowCatPie"></div>
+          </div>
+          <div style="max-width:360px;min-width:260px;">
+            <div class="chart-title" style="margin:6px 0 8px;">协议分布 (含二层)</div>
+            <div id="flowProtoBox"></div>
+          </div>
+        </div>
+        <div class="flow-section">
+          <div class="chart-title" style="margin:6px 0 8px;">二层控制报文分析 <span style="font-weight:400;font-size:12px;color:var(--fg-dim);">(ARP 风暴 / 私接交换机 / 环路隐患; 需要 sFlow 原始报文头采样)</span></div>
+          <div id="flowL2Box"></div>
+        </div>
+
+        <div class="flow-cols">
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">Top 源 IP (谁发起的流量最多)</div>
+            <div class="flow-scroll">
+              <table id="flowTopSrcTable">
+                <thead><tr><th style="cursor:default;">IP</th><th style="cursor:default;">方向</th><th style="cursor:default;">流量</th><th style="cursor:default;">样本/流</th></tr></thead>
+                <tbody id="flowTopSrcBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">Top 目的 IP (谁被访问最多)</div>
+            <div class="flow-scroll">
+              <table id="flowTopDstTable">
+                <thead><tr><th style="cursor:default;">IP</th><th style="cursor:default;">方向</th><th style="cursor:default;">流量</th><th style="cursor:default;">样本/流</th></tr></thead>
+                <tbody id="flowTopDstBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div style="max-width:340px;min-width:260px;">
+            <div class="chart-title" style="margin:6px 0 8px;">协议/端口分布</div>
+            <div id="flowPortPie"></div>
+          </div>
+        </div>
+
+        <div class="flow-cols">
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">应用域名 Top (DNS 查询 / HTTPS SNI / HTTP Host) <span id="flowL7Hint" style="font-weight:400;font-size:12px;color:var(--fg-dim);"></span></div>
+            <div class="flow-scroll">
+              <table id="flowDomainTable">
+                <thead><tr><th style="cursor:default;">域名</th><th style="cursor:default;">类型</th><th style="cursor:default;">访问终端数</th><th style="cursor:default;">样本</th><th style="cursor:default;">流量</th></tr></thead>
+                <tbody id="flowDomainBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">网段流量矩阵 (IPv4 按 /24 归并, 看哪两个业务区之间在大量互访)</div>
+            <div class="flow-scroll">
+              <table id="flowMatrixTable">
+                <thead><tr><th style="cursor:default;">源网段</th><th style="cursor:default;">目的网段</th><th style="cursor:default;">方向</th><th style="cursor:default;">流量</th><th style="cursor:default;">样本/流</th></tr></thead>
+                <tbody id="flowMatrixBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-cols">
+          <div style="max-width:360px;">
+            <div class="chart-title" style="margin:6px 0 8px;">VLAN 分布</div>
+            <div class="flow-scroll">
+              <table id="flowVlanTable">
+                <thead><tr><th style="cursor:default;">VLAN</th><th style="cursor:default;">流量</th><th style="cursor:default;">样本/流</th></tr></thead>
+                <tbody id="flowVlanBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="chart-title" style="margin:6px 0 8px;">TCP 行为 &amp; 疑似扫描源</div>
+            <div id="flowTcpBox" style="font-size:12.5px;color:var(--fg-dim);margin-bottom:6px;"></div>
+            <div class="flow-scroll">
+              <table id="flowSynTable">
+                <thead><tr><th style="cursor:default;">源 IP</th><th style="cursor:default;">纯 SYN 样本</th><th style="cursor:default;">不同目标数</th><th style="cursor:default;">目标举例</th></tr></thead>
+                <tbody id="flowSynBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-section">
+          <div class="chart-title" style="margin:6px 0 8px;">接口拥塞关联 (sFlow 计数器发现丢包/错包/接近跑满的接口, 以及同一时间窗口里经过它的 Top 会话)</div>
+          <div id="flowCongestionBox"></div>
+        </div>
+
+        <div class="flow-section">
+          <div class="chart-title" style="margin:6px 0 8px;">接口计数器 (sFlow counter sampling, 设备主动推送, 通常 20~30 秒一次) <span id="flowHostHint" style="font-weight:400;font-size:12px;color:var(--fg-dim);"></span></div>
+          <div class="flow-scroll">
+            <table id="flowIfTable">
+              <thead><tr><th style="cursor:default;">接口</th><th style="cursor:default;">状态</th><th style="cursor:default;">速率</th><th style="cursor:default;">入 Mbps / 利用率</th><th style="cursor:default;">出 Mbps / 利用率</th><th style="cursor:default;">丢包 入/出</th><th style="cursor:default;">错包 入/出</th><th style="cursor:default;">广播 pps</th><th style="cursor:default;">更新于</th></tr></thead>
+              <tbody id="flowIfBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-title" style="margin:6px 0 8px;">Top 会话 (按流量排序)</div>
+        <div style="max-height:26vh;overflow:auto;margin-bottom:16px;">
+          <table id="flowTopTable">
+            <thead><tr><th style="cursor:default;">源 IP</th><th style="cursor:default;">目的 IP</th><th style="cursor:default;">目的端口</th><th style="cursor:default;">协议</th><th style="cursor:default;">流量</th><th style="cursor:default;">包数</th><th style="cursor:default;">样本/流</th></tr></thead>
+            <tbody id="flowTopBody"></tbody>
+          </table>
+        </div>
+        <div class="table-toolbar">
+          <div class="chart-title" style="margin:6px 0;">最近原始记录 <span id="flowSuspiciousHint" style="font-weight:400;font-size:12px;color:var(--fg-dim);"></span></div>
+          <input type="text" class="search-box" id="flowRecSearch" placeholder="筛选 IP / 端口 / 域名 / MAC / VLAN..." oninput="renderFlowRecords()">
+        </div>
+        <div style="max-height:30vh;overflow:auto;">
+          <table id="flowRecTable">
+            <thead><tr><th style="cursor:default;">时间</th><th style="cursor:default;">源 IP:端口</th><th style="cursor:default;">目的 IP:端口</th><th style="cursor:default;">协议</th><th style="cursor:default;">VLAN</th><th style="cursor:default;">应用 / 域名</th><th style="cursor:default;">TCP 标志</th><th style="cursor:default;">流量</th><th style="cursor:default;">入接口</th><th style="cursor:default;">出接口</th><th style="cursor:default;">标记</th></tr></thead>
+            <tbody id="flowRecBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

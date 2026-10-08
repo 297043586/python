@@ -1,0 +1,34 @@
+<div class="modal-overlay" id="backupModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 style="margin:0;font-size:18px;">💾 配置备份</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;">通过 SSH / Telnet 登录设备执行 display current-configuration / show running-config 并按版本归档; 也可手工上传。配置有变化才新增版本, 可对比任意两个版本。</div>
+      </div>
+      <button class="modal-close" onclick="closeBackups()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="bkSshNotice"></div>
+      <div class="rpt-bar">
+        <button class="hbtn" onclick="runBackup('')">▶ 备份全部(已配凭据的设备)</button>
+        <button class="filter-btn" onclick="bulkBackupCred()">🔑 批量设置凭据</button>
+        <button class="filter-btn" onclick="openPush()" title="用这里的登录凭据给设备下发 sFlow / syslog 等配置">🛠️ 配置下发</button>
+        <label style="font-size:13px;"><input type="checkbox" id="bkAuto"> 每天</label>
+        <input type="number" id="bkHour" min="0" max="23" style="width:64px;"> <span style="font-size:13px;">点自动备份</span>
+        <label style="font-size:13px;">每台保留 <input type="number" id="bkKeep" min="1" max="1000" style="width:70px;"> 份</label>
+        <label style="font-size:13px;" title="跟上一份一样时不新增版本, 只记录'无变化'"><input type="checkbox" id="bkOnlyChanged"> 仅在配置变化时存新版本</label>
+        <input type="text" id="bkSsh" placeholder="ssh 路径(留空=自动查找)" style="width:210px;">
+        <button class="filter-btn" onclick="saveBackupSettings()">保存设置</button>
+        <span id="bkMsg" style="font-size:12.5px;"></span>
+      </div>
+      <div id="bkTableWrap">
+        <table>
+          <thead><tr><th style="cursor:default;">设备</th><th style="cursor:default;">登录方式</th><th style="cursor:default;">最近一次</th><th style="cursor:default;">版本数</th><th style="cursor:default;">操作</th></tr></thead>
+          <tbody id="bkBody"></tbody>
+        </table>
+      </div>
+      <div id="bkSplitter" title="拖动调整上下高度, 双击放大 / 还原下半部分"></div>
+      <div id="bkPanelBox"><button class="bk-collapse" onclick="bkCollapse()" title="收起, 表格恢复铺满">✕ 收起</button><button class="bk-collapse bk-max" onclick="bkToggleMax()" title="放大 / 还原配置查看区">⤢ 放大</button><div id="bkPanel"></div></div>
+    </div>
+  </div>
+</div>

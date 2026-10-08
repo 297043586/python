@@ -1,0 +1,51 @@
+/*
+ * 巡检报告 / 配置备份。
+ */
+/* ================= 巡检报告 / 配置备份 ================= */
+.two-pane { display: flex; gap: 16px; min-height: 0; flex: 1; }
+.two-pane > .pane-list { width: 330px; flex-shrink: 0; overflow: auto; border-right: 1px solid var(--card-border); padding-right: 12px; }
+.two-pane > .pane-main { flex: 1; overflow: auto; min-width: 0; }
+@media (max-width: 860px) { .two-pane { flex-direction: column; } .two-pane > .pane-list { width: auto; border-right: 0; max-height: 34vh; } }
+.rpt-item { padding: 10px 12px; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; background: var(--card-bg); }
+.rpt-item:hover, .rpt-item.active { border-color: var(--accent); }
+.rpt-item .t { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rpt-item .m { font-size: 12px; color: var(--fg-dim); margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rpt-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; padding: 10px 12px; background: var(--hover); border: 1px solid var(--card-border); border-radius: 8px; }
+.rpt-bar select, .rpt-bar input[type=text], .rpt-bar input[type=number], .rpt-form input, .rpt-form select, .rpt-form textarea {
+  padding: 7px 10px; border-radius: 6px; border: 1px solid var(--input-border); background: var(--card-bg); color: var(--fg); font-size: 13px; }
+.rpt-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.rpt-form label { display: block; font-size: 12.5px; color: var(--fg-dim); margin-bottom: 4px; }
+.rpt-form input, .rpt-form select, .rpt-form textarea { width: 100%; }
+.rpt-doc { max-width: 980px; }
+.rpt-head { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.rpt-score { width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+.rpt-score > div { width: 68px; height: 68px; border-radius: 50%; background: var(--card-bg); display: grid; place-items: center; text-align: center; line-height: 1.1; }
+.rpt-score b { font-size: 24px; } .rpt-score span { font-size: 11px; color: var(--fg-dim); }
+.rpt-sec { margin: 16px 0; } .rpt-sec h3 { font-size: 15px; margin: 0 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--card-border); }
+.rpt-li { display: flex; gap: 8px; font-size: 13px; line-height: 1.6; padding: 2px 0; }
+.rpt-li i { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; background: var(--fg-faint); }
+.rpt-li.ok i { background: var(--good); } .rpt-li.warn i { background: var(--warn); } .rpt-li.bad i { background: var(--bad); } .rpt-li.info i { background: var(--info); }
+.rpt-doc table td { white-space: normal; }
+.rpt-chart { display: block; margin: 6px 0 10px; }
+.rpt-chart .lb { font-size: 11px; fill: var(--fg-dim); }
+.rpt-chart .vl { font-size: 11px; fill: var(--fg); font-weight: 600; }
+.rpt-chart .track { fill: var(--track); }
+.rpt-chart .axis { stroke: var(--card-border); }
+.rpt-ai { background: var(--hover); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px 18px; margin-top: 16px; font-size: 13.5px; line-height: 1.75; }
+.rpt-ai h1, .rpt-ai h2, .rpt-ai h3 { font-size: 15px; margin: 14px 0 6px; } .rpt-ai h2 { font-size: 16px; }
+.rpt-ai code { background: var(--track); padding: 0 4px; border-radius: 3px; } .rpt-ai pre { background: var(--log-bg); color: var(--log-fg); padding: 10px; border-radius: 6px; overflow: auto; }
+.rpt-ai blockquote { border-left: 3px solid var(--warn); margin: 6px 0; padding: 2px 10px; color: var(--fg-dim); }
+.rpt-ai table { margin: 8px 0; } .rpt-ai td, .rpt-ai th { border: 1px solid var(--card-border); position: static; }
+.cfg-pre { background: var(--log-bg); color: var(--log-fg); padding: 12px; border-radius: 8px; font-family: Consolas, Monaco, monospace; font-size: 12.5px; line-height: 1.55; max-height: 60vh; overflow: auto; white-space: pre; }
+.cfg-pre span { display: block; min-height: 1.55em; }
+.cfg-pre .add { background: rgba(16,185,129,.22); display: block; } .cfg-pre .del { background: rgba(239,68,68,.22); display: block; } .cfg-pre .gap { color: var(--fg-faint); display: block; font-style: italic; }
+.st-ok { color: var(--good); } .st-bad { color: var(--bad); }
+@media print {
+  body.printing-report { background: #fff !important; color: #000; padding: 0; }
+  body.printing-report > *:not(#reportModal) { display: none !important; }
+  body.printing-report::after { display: none !important; }
+  body.printing-report #reportModal { position: static; display: block !important; background: none; }
+  body.printing-report #reportModal .modal-content { width: auto; max-width: none; height: auto; box-shadow: none; border: 0; background: #fff; color: #000; }
+  body.printing-report #reportModal .modal-header, body.printing-report .pane-list, body.printing-report .rpt-bar, body.printing-report .no-print { display: none !important; }
+  body.printing-report .modal-body, body.printing-report .pane-main { overflow: visible; }
+}

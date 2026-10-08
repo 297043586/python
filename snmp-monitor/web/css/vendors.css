@@ -1,0 +1,28 @@
+/*
+ * 厂商识别规则 / 私有 OID。
+ */
+.ven-wrap { display: flex; gap: 14px; align-items: flex-start; }
+.ven-list { width: 190px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
+.ven-list button { text-align: left; padding: 8px 10px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); color: var(--fg); cursor: pointer; font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.ven-list button.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.ven-list button small { margin-left: auto; font-size: 11px; color: var(--fg-faint); }
+.ven-list button .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.ven-list .add { border-style: dashed; justify-content: center; color: var(--fg-dim); }
+.ven-ed { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.ven-ed .set-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.ven-rows { display: flex; flex-direction: column; gap: 6px; }
+.ven-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ven-row input, .ven-row select { padding: 6px 8px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg); color: var(--fg); font-size: 12.5px; }
+.ven-row input.oid { flex: 1; min-width: 200px; font-family: Consolas, "Cascadia Mono", monospace; }
+.ven-row input.num { width: 90px; }
+.ven-row input.vals { width: 110px; }
+.ven-row .x, .ven-row .try { border: 0; background: transparent; cursor: pointer; font-size: 14px; color: var(--fg-dim); padding: 2px 4px; }
+.ven-row .x:hover { color: var(--bad); } .ven-row .try:hover { color: var(--accent); }
+.ven-addrow { align-self: flex-start; font-size: 12px; padding: 4px 10px; border: 1px dashed var(--card-border); border-radius: 6px; background: transparent; color: var(--fg-dim); cursor: pointer; }
+.ven-test { border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px; background: var(--card-bg); }
+.ven-test .ven-row input.oid { min-width: 260px; }
+.ven-test table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12.5px; }
+.ven-test td { padding: 3px 6px; border-bottom: 1px solid var(--card-border); font-family: Consolas, monospace; word-break: break-all; }
+.ven-test td:first-child { color: var(--fg-dim); width: 30%; }
+.ven-msg { font-size: 12.5px; margin-top: 6px; }
+@media (max-width: 760px) { .ven-wrap { flex-direction: column; } .ven-list { width: 100%; flex-direction: row; flex-wrap: wrap; } }

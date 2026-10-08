@@ -1,0 +1,33 @@
+<div class="home-tb tb" id="homeTb">
+  <input type="text" class="search-box" id="homeQ" placeholder="搜索设备名 / IP / 备注 / 型号 / 分组 / 位置…" autocomplete="off">
+  <span class="chips" id="homeState"></span>
+  <span class="grow"></span>
+  <span class="tb-label">分组</span>
+  <select id="homeGroup" title="按什么把设备分成一组一组显示">
+    <option value="">不分组</option>
+    <option value="group">按自定义分组</option>
+    <option value="state">按状态</option>
+    <option value="brand">按厂商</option>
+    <option value="model">按型号</option>
+    <option value="subnet">按网段 (/24)</option>
+    <option value="location">按位置 (sysLocation)</option>
+  </select>
+  <span class="tb-label">排序</span>
+  <select id="homeSort">
+    <option value="ip">IP 地址</option>
+    <option value="name">设备名</option>
+    <option value="state">状态(离线 / 告警在前)</option>
+    <option value="alerts">未处理告警数</option>
+    <option value="cpu">CPU 使用率</option>
+    <option value="mem">内存使用率</option>
+    <option value="temp">温度</option>
+  </select>
+  <span class="segb" id="homeView">
+    <button data-v="cards" title="大卡片">▦ 卡片</button><button data-v="compact" title="小卡片, 设备多时一屏能看更多">▤ 紧凑</button><button data-v="list" title="一台设备一行">☰ 列表</button>
+  </span>
+  <button class="btn sm" id="homeFold" title="全部折叠 / 展开分组">⇕ 折叠</button>
+</div>
+<div id="homeBody"></div>
+<div class="empty" id="emptyHint" style="display:none;">
+  还没有监控节点。点右上角「⚙️ 设备管理」添加第一台交换机(需要登录)。
+</div>

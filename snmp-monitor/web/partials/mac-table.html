@@ -1,0 +1,35 @@
+<div class="modal-overlay" id="macModal">
+  <div class="modal-content wide" id="macBox">
+    <div class="modal-header">
+      <div>
+        <h2 id="gmacTitle" style="margin:0;font-size:18px;">🗂️ 全网 MAC 总表</h2>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="gmacSub">汇总所有设备去重后的结果: 一个终端只显示它真正接入的那个口; 点设备名 / 端口直接跳到那台设备</div>
+      </div>
+      <div class="tb"><span id="gmacFs"></span><button class="modal-close" onclick="closeMACTable()">&times;</button></div>
+    </div>
+    <div class="modal-body fill">
+      <div class="tb">
+        <input type="text" class="search-box" id="gmacSearch" placeholder="搜 MAC(任意写法) / 终端 IP / 设备 / 端口…" autocomplete="off">
+        <div class="ms" id="gmacVlanFilter" data-all="全部 VLAN" data-label="VLAN" data-change="renderGlobalMACTable"></div>
+        <div class="ms" id="gmacDeviceFilter" data-all="全部设备" data-label="设备" data-change="renderGlobalMACTable"></div>
+        <div class="ms" id="gmacKindFilter" data-all="全部类型" data-label="类型" data-change="renderGlobalMACTable"></div>
+        <button class="btn sm" onclick="gmacClear()">✕ 清除筛选</button>
+        <span class="grow"></span>
+        <span class="tb-label">分组</span>
+        <select id="gmacGroup">
+          <option value="">不分组</option>
+          <option value="device">按设备</option>
+          <option value="port">按设备端口</option>
+          <option value="vlan">按 VLAN</option>
+          <option value="subnet">按终端网段 (/24)</option>
+          <option value="kind">按类型</option>
+        </select>
+        <button class="btn sm" id="gmacFold" title="全部折叠 / 展开">⇕</button>
+        <button class="btn sm" onclick="gmacExport()" title="导出当前筛选结果">📥 导出 CSV</button>
+        <button class="btn sm" onclick="openMACTable(true)" title="重新拉取">⟳</button>
+      </div>
+      <div class="gmac-stat" id="gmacStat"></div>
+      <div id="gmacTable" class="vt-fill"></div>
+    </div>
+  </div>
+</div>
