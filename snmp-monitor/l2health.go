@@ -572,7 +572,11 @@ func l2HealthFindings(reports []DeviceReport, cfg *Config) []L2Finding {
 			devMACs[e.MAC]++
 		}
 		if e.IPConflict {
-			conflicts[e.IP] = append(conflicts[e.IP], e.MAC+" @ "+e.DeviceName+" "+e.RealPort)
+			where := e.DeviceName + " " + e.RealPort
+			if e.LocDeviceIP != "" {
+				where = e.LocDeviceName + " " + e.LocPort
+			}
+			conflicts[e.IP] = append(conflicts[e.IP], e.MAC+" @ "+where)
 		}
 	}
 	for mac, ips := range multi {

@@ -3,7 +3,7 @@
     <div class="modal-header">
       <div>
         <h2 id="garpTitle" style="margin:0;font-size:18px;">🌐 全网 ARP 总表</h2>
-        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="garpSub">汇总所有设备的 IP-MAC 绑定; 可以直接按 IP 或 MAC 搜, 不用先去 MAC 表反查; 红色是 IP 冲突, 橙色是同一网段里一个 MAC 挂了好几个 IP(排查 ARP 攻击/中毒看这两列); 三层交换机自己的各个接口、路由器跨网段的多个接口单独标出, 不算异常</div>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px;" id="garpSub">汇总所有设备的 IP-MAC 绑定; 可以直接按 IP 或 MAC 搜, 不用先去 MAC 表反查; 「接入位置」是终端实际插的设备和端口(跟 MAC 总表同一套归属), 「ARP 来源设备」是解析到这条 ARP 的网关; 红色是 IP 冲突, 橙色是同一网段里一个 MAC 挂了好几个 IP(排查 ARP 攻击/中毒看这两列); 三层交换机自己的各个接口、路由器跨网段的多个接口单独标出, 不算异常</div>
       </div>
       <div class="tb"><span id="garpFs"></span><button class="modal-close" onclick="closeARPTable()">&times;</button></div>
     </div>

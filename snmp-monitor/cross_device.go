@@ -51,13 +51,14 @@ func enrichCrossDeviceHosts(reports []DeviceReport) {
 	type arpSource struct {
 		ip, deviceName string
 	}
-	globalARP := make(map[string]arpSource, 256) // mac -> 全网第一个查到的 (ip, 来源设备)
+	// mac -> (ip, 来源设备); 一个 MAC 多个 IP 时取地址最小的, 结果跟设备巡检顺序无关
+	globalARP := make(map[string]arpSource, 256)
 	for _, rep := range reports {
 		for _, h := range rep.HostMappings {
 			if h.MAC == "" || h.IP == "" || h.IPSource != "" {
 				continue // 已经是关联来的就不再当"权威来源"用, 避免链式以讹传讹
 			}
-			if _, ok := globalARP[h.MAC]; !ok {
+			if cur, ok := globalARP[h.MAC]; !ok || ipLess(h.IP, cur.ip) {
 				globalARP[h.MAC] = arpSource{ip: h.IP, deviceName: rep.SysName}
 			}
 		}

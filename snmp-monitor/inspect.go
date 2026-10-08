@@ -194,6 +194,7 @@ func inspectDevice(target DeviceTarget, cfg *Config, round int64) DeviceReport {
 		rxPower, txPower     map[string]float64
 		optSource            string
 		fdb                  fdbResult
+		fdbRaw               *fdbBuilder
 		arp                  []arpEntry
 		portLayer            portLayerInfo
 		portExt              portExtRaw
@@ -259,7 +260,7 @@ func inspectDevice(target DeviceTarget, cfg *Config, round int64) DeviceReport {
 	}
 	if heavy {
 		tasks = append(tasks,
-			func(s *snmpSession) { phase("MAC表", func() { fdb = collectFDB(s, resolver) }) },
+			func(s *snmpSession) { phase("MAC表", func() { fdbRaw = collectFDBRaw(s, resolver) }) },
 			func(s *snmpSession) { phase("ARP表", func() { arp = collectARP(s) }) },
 		)
 	} else if !target.Collect.SkipHosts && hasPreviousHeavy {
@@ -314,18 +315,35 @@ func inspectDevice(target DeviceTarget, cfg *Config, round int64) DeviceReport {
 	}
 
 	if heavy {
+		if fdbRaw == nil { // 采集任务异常(已 recover)时也给一个空表, 别把 nil 落进缓存
+			fdbRaw = newFDBBuilder()
+		}
+		// 需要 per-VLAN 团体名才能看全 MAC 表的设备(Cisco 等): 对全部已知 VLAN 补采,
+		// 跟普通转发表行一起落定后再缓存, 之后各轮不再改动缓存里的数据。
+		vlanFormat := target.VlanCommunityFormat
+		if vlanFormat == "" {
+			vlanFormat = cfg.VlanCommunityFormat
+		}
+		if vlanFormat != "" {
+			phase("MAC表(按VLAN)", func() {
+				collectFDBPerVlan(target, cfg, vlanFormat, knownVlans(portLayer, ifs), resolver, fdbRaw)
+			})
+		}
+		fdb = fdbRaw.finish()
 		stateLock.Lock()
 		lastHeavy[target.stateKey()] = heavyCache{fdb: fdb, arp: arp, round: round}
 		stateLock.Unlock()
 	}
 	rep.FDBSource = fdb.source
 
-	// 用 LLDP + 端口角色信息对"一个 MAC 出现在多个端口"的情况做最终裁决,
-	// 把 fdb.macToIf / fdb.portMACs 换成裁决后的结果, 后面所有引用这两个
-	// 字段的地方(端口 MAC 计数、上联口判定、IP-MAC 定位)都自动生效。
+	// 有 LLDP/CDP 邻居的口(含成员口有邻居的聚合口)一定是上联/级联口。
+	nbrPorts := uplinkPortSet(ifs, lldp, portLayer.aggGroup)
+
+	// 用 LLDP + 端口角色信息对"一个 MAC 出现在多个端口"的情况做最终裁决。
+	// 裁决结果是新 map, 不改动 fdb 里(可能来自缓存)的原始数据; 端口 MAC 计数仍是原始值。
 	var macAmbiguous map[string]bool
 	if !target.Collect.SkipHosts {
-		fdb.macToIf, fdb.portMACs, macAmbiguous = resolveFDB(fdb, ifs, lldp, cfg.UplinkMACThreshold)
+		fdb.macToIf, macAmbiguous = resolveFDB(fdb, nbrPorts, cfg.UplinkMACThreshold)
 	}
 
 	rep.Hardware = hwRep.Hardware
@@ -536,7 +554,7 @@ func inspectDevice(target DeviceTarget, cfg *Config, round int64) DeviceReport {
 		nbrSrc := neighbor.Src
 
 		macCount := fdb.portMACs[idx]
-		isUplink := neighbor.Dev != "" || macCount >= cfg.UplinkMACThreshold
+		isUplink := isUplinkPort(idx, fdb.portMACs, nbrPorts, cfg.UplinkMACThreshold)
 
 		if !cfg.Alerts.PortError.Disabled && status == "UP" && deltaErr >= int64(cfg.Alerts.PortError.Threshold) {
 			rep.alert("warning", "port_err", name,
@@ -590,157 +608,10 @@ func inspectDevice(target DeviceTarget, cfg *Config, round int64) DeviceReport {
 
 	rep.AggGroups = buildAggGroups(aggMembers, rep.Ports, ifs, portLayer)
 
-	// 6. MAC 地址总表: 汇总 + 去重后的全量视图, 不要求有 ARP/IP。
+	// 6. MAC 表 / MAC 转发表 / IP-MAC-端口, 见 buildHostTables。
 	if !target.Collect.SkipHosts {
-		rep.MACTable = make([]MACEntry, 0, len(fdb.macLocations))
-		for mac, ifIdx := range fdb.macToIf {
-			e, ok := ifs[ifIdx]
-			if !ok {
-				continue
-			}
-			amb := macAmbiguous[mac]
-			kind := "接入口"
-			isUp := fdb.portMACs[ifIdx] >= cfg.UplinkMACThreshold || lldp[ifIdx].Dev != ""
-			if isUp {
-				kind = "上联/级联口"
-			}
-			vlan := fdb.macVlan[mac]
-			if vlan == "" {
-				if v, ok := fdb.portVlan[ifIdx]; ok {
-					vlan = v
-				} else {
-					vlan = "-"
-				}
-			}
-			entry := MACEntry{MAC: mac, VlanID: vlan, Port: e.display(), PortKind: kind, IsUplink: isUp, Ambiguous: amb}
-			if amb {
-				for _, l := range fdb.macLocations[mac] {
-					if le, ok := ifs[l]; ok {
-						entry.Locations = append(entry.Locations, le.display())
-					}
-				}
-			}
-			rep.MACTable = append(rep.MACTable, entry)
-		}
-		sort.Slice(rep.MACTable, func(i, j int) bool { return rep.MACTable[i].MAC < rep.MACTable[j].MAC })
-	}
-	for _, row := range fdb.fdbRows {
-		if len(row.Locations) == 0 {
-			continue
-		}
-		ifIdx := row.Locations[0]
-		for _, candidate := range row.Locations {
-			if candidate == fdb.macToIf[row.MAC] {
-				ifIdx = candidate
-				break
-			}
-		}
-		e, ok := ifs[ifIdx]
-		if !ok {
-			continue
-		}
-		isUplink := fdb.portMACs[ifIdx] >= cfg.UplinkMACThreshold || lldp[ifIdx].Dev != ""
-		kind := "接入口"
-		if isUplink {
-			kind = "上联/级联口"
-		}
-		entry := MACEntry{
-			MAC: row.MAC, VlanID: row.VlanID, Port: e.display(),
-			PortKind: kind, IsUplink: isUplink, Ambiguous: len(row.Locations) > 1,
-		}
-		if entry.Ambiguous {
-			for _, location := range row.Locations {
-				if le, ok := ifs[location]; ok {
-					entry.Locations = append(entry.Locations, le.display())
-				}
-			}
-		}
-		rep.FDBTable = append(rep.FDBTable, entry)
-	}
-
-	// 7. IP - MAC - 物理端口
-	//
-	// VLAN 号的可信度分三档, 依次尝试:
-	//   1. fdb.macVlan  —— 来自 dot1qTpFdbTable, 精确值
-	//   2. fdb.portVlan —— 该口的 PVID, 对 access 口准确, 对 trunk 口只是主 VLAN 猜测
-	//   3. 从三层 SVI 接口名(如 "Vlan-interface10")里抠数字 —— 猜测, 且只对该条 ARP 本身适用
-	// 只有第 1 档才标记 VlanExact=true。
-	buildEntry := func(a arpEntry) HostMappingEntry {
-		vlanName := "-"
-		if e, ok := ifs[a.IfIndex]; ok {
-			vlanName = e.display()
-		} else if a.IfIndex != "" {
-			vlanName = "ifIndex-" + a.IfIndex
-		}
-		entry := HostMappingEntry{IP: a.IP, MAC: a.MAC, VlanIf: vlanName, RealPort: "未定位", PortKind: "未定位"}
-
-		if v, ok := fdb.macVlan[a.MAC]; ok && v != "" {
-			entry.VlanID, entry.VlanExact = v, true
-		}
-		if ifIdx, ok := fdb.macToIf[a.MAC]; ok {
-			if e, ok2 := ifs[ifIdx]; ok2 {
-				entry.RealPort = e.display()
-				if fdb.portMACs[ifIdx] >= cfg.UplinkMACThreshold || lldp[ifIdx].Dev != "" {
-					entry.PortKind = "上联/级联口"
-				} else {
-					entry.PortKind = "接入口"
-				}
-				if entry.VlanID == "" {
-					if v, ok := fdb.portVlan[ifIdx]; ok {
-						entry.VlanID = v // 档 2: PVID 猜测
-					}
-				}
-			}
-		}
-		if entry.VlanID == "" {
-			if v := vlanFromIfaceName(vlanName); v != "" {
-				entry.VlanID = v // 档 3: 接口名猜测
-			}
-		}
-		if entry.VlanID == "" {
-			entry.VlanID = "-"
-		}
-		return entry
-	}
-
-	for _, a := range arp {
-		rep.HostMappings = append(rep.HostMappings, buildEntry(a))
-	}
-
-	// 补充查询: 如果配置了 per-VLAN 团体名, 就针对"还没定位到端口, 但已经
-	// 猜到/确定 VLAN 号"的记录, 按 VLAN 去重后各查一次, 把新解出的
-	// MAC->端口 合并回 fdb 再重新生成一遍 HostMappings。
-	vlanFormat := target.VlanCommunityFormat
-	if vlanFormat == "" {
-		vlanFormat = cfg.VlanCommunityFormat
-	}
-	if vlanFormat != "" {
-		need := map[string]bool{}
-		for _, h := range rep.HostMappings {
-			if h.PortKind == "未定位" && h.VlanID != "-" {
-				need[h.VlanID] = true
-			}
-		}
-		gained := 0
-		for vlanID := range need {
-			extra := resolveVlanCommunity(target, cfg, vlanFormat, vlanID, resolver)
-			for mac, ifIdx := range extra {
-				if _, dup := fdb.macToIf[mac]; dup {
-					continue
-				}
-				fdb.macToIf[mac] = ifIdx
-				fdb.portMACs[ifIdx]++
-				gained++
-			}
-		}
-		if gained > 0 {
-			rep.HostMappings = rep.HostMappings[:0]
-			for _, a := range arp {
-				rep.HostMappings = append(rep.HostMappings, buildEntry(a))
-			}
-			rep.Diagnostics = append(rep.Diagnostics,
-				fmt.Sprintf("通过 per-VLAN 团体名补充定位到 %d 条 MAC 记录", gained))
-		}
+		ht := buildHostTables(fdb, macAmbiguous, arp, ifs, nbrPorts, cfg.UplinkMACThreshold)
+		rep.MACTable, rep.FDBTable, rep.HostMappings = ht.macTable, ht.fdbTable, ht.hosts
 	}
 
 	if rep.TotalPorts > 0 {

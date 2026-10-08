@@ -606,262 +606,64 @@ func collectPortLayerInfo(s *snmpSession, ifs map[string]*ifInfo, r *indexResolv
 	return out
 }
 
-func collectFDB(s *snmpSession, r *indexResolver) fdbResult {
-	res := fdbResult{
-		macToIf:      make(map[string]string),
-		macVlan:      make(map[string]string),
-		macLocations: make(map[string][]string),
-		portMACs:     make(map[string]int),
-		portVlan:     make(map[string]string),
-	}
+// collectFDBRaw 读 Q-BRIDGE 与传统 BRIDGE 两张转发表, 原始行交给 fdbBuilder,
+// 等 per-VLAN 团体名补采(如果配置了)也合并进来之后再 finish()。
+func collectFDBRaw(s *snmpSession, r *indexResolver) *fdbBuilder {
+	b := newFDBBuilder()
 
-	bridgeToIf := make(map[string]string)
-	for bport, v := range s.walkInts(oidDot1dBasePortIfIndex) {
-		ifIdx := strconv.FormatInt(v, 10)
-		if r.ifExists[ifIdx] {
-			bridgeToIf[bport] = ifIdx
-		}
-	}
-	// PVID 兜底: 只在 dot1qTpFdb 没给出精确 VLAN 时才会用到, 见 inspectDevice。
+	bridgeToIf := walkBridgePorts(s, r)
+	// PVID 兜底: 只在转发表没给出精确 VLAN 时才会用到。
 	for bport, pvid := range s.walkInts(oidDot1qPvid) {
 		if pvid <= 0 {
 			continue
 		}
-		ifIdx := resolveBridgePortIfIndex(bport, bridgeToIf, r)
-		if ifIdx != "" {
-			res.portVlan[ifIdx] = strconv.FormatInt(pvid, 10)
-		}
-	}
-	resolveBridge := func(bport string) string {
-		return resolveBridgePortIfIndex(bport, bridgeToIf, r)
-	}
-
-	locSet := make(map[string]map[string]bool) // mac -> 见过的 ifIndex 集合
-	rowLocSet := make(map[fdbRowKey]map[string]bool)
-	legacyLocSet := make(map[string]map[string]bool)
-	qMACs := make(map[string]bool)
-	macVlanSet := make(map[string]map[string]bool)
-	add := func(mac, vlan, ifIdx string) {
-		if mac == "" || ifIdx == "" {
-			return
-		}
-		if locSet[mac] == nil {
-			locSet[mac] = make(map[string]bool)
-		}
-		locSet[mac][ifIdx] = true
-		if vlan != "" {
-			if macVlanSet[mac] == nil {
-				macVlanSet[mac] = make(map[string]bool)
-			}
-			macVlanSet[mac][vlan] = true
-			key := fdbRowKey{mac: mac, vlan: vlan}
-			if rowLocSet[key] == nil {
-				rowLocSet[key] = make(map[string]bool)
-			}
-			rowLocSet[key][ifIdx] = true
-		} else {
-			if legacyLocSet[mac] == nil {
-				legacyLocSet[mac] = make(map[string]bool)
-			}
-			legacyLocSet[mac][ifIdx] = true
+		if ifIdx := resolveBridgePortIfIndex(bport, bridgeToIf, r); ifIdx != "" {
+			b.portVlan[ifIdx] = strconv.FormatInt(pvid, 10)
 		}
 	}
 
-	// 1) Q-BRIDGE: 索引 = vlanId . 6 段 MAC
-	q := 0
+	// 1) Q-BRIDGE: 索引 = FdbId . 6 段 MAC(FdbId 经 dot1qVlanFdbId 换算成 VLAN)
 	qStatus := s.walkInts(oidDot1qTpFdbStatus)
+	vlanOf := fdbVlanMapper(s.walkInts(oidDot1qVlanFdbId))
 	_ = s.walk(oidDot1qTpFdbPort, func(idx string, pdu gosnmp.SnmpPDU) {
 		parts := strings.Split(idx, ".")
 		if len(parts) != 7 {
 			return
 		}
-		if st, ok := qStatus[idx]; ok && st != 3 { // 只要 learned(3)
+		if st, ok := qStatus[idx]; !fdbStatusUsable(st, ok) {
 			return
 		}
 		bport := strconv.FormatInt(toInt64(pdu.Value), 10)
 		if bport == "0" {
 			return
 		}
-		mac := macFromOIDDigits(parts[1:])
-		if ifIdx := resolveBridge(bport); ifIdx != "" {
-			add(mac, parts[0], ifIdx)
-			qMACs[mac] = true
-			q++
+		if b.add(macFromOIDDigits(parts[1:]), vlanOf(parts[0]), resolveBridgePortIfIndex(bport, bridgeToIf, r)) {
+			b.nQ++
 		}
 	})
 
-	// 2) 传统 BRIDGE: 索引 = 6 段 MAC
-	d := 0
+	// 2) 传统 BRIDGE: 索引 = 6 段 MAC, 没有 VLAN
 	dStatus := s.walkInts(oidDot1dTpFdbStatus)
 	_ = s.walk(oidDot1dTpFdbPort, func(idx string, pdu gosnmp.SnmpPDU) {
 		parts := strings.Split(idx, ".")
 		if len(parts) != 6 {
 			return
 		}
-		if st, ok := dStatus[idx]; ok && st != 3 {
+		if st, ok := dStatus[idx]; !fdbStatusUsable(st, ok) {
 			return
 		}
 		bport := strconv.FormatInt(toInt64(pdu.Value), 10)
 		if bport == "0" {
 			return
 		}
-		mac := macFromOIDDigits(parts)
-		if ifIdx := resolveBridge(bport); ifIdx != "" {
-			add(mac, "", ifIdx)
-			d++
+		if b.add(macFromOIDDigits(parts), "", resolveBridgePortIfIndex(bport, bridgeToIf, r)) {
+			b.nD++
 		}
 	})
-
-	switch {
-	case q > 0 && d > 0:
-		res.source = fmt.Sprintf("dot1qTpFdb(%d) + dot1dTpFdb(%d)", q, d)
-	case q > 0:
-		res.source = fmt.Sprintf("dot1qTpFdb(%d 条)", q)
-	case d > 0:
-		res.source = fmt.Sprintf("dot1dTpFdb(%d 条)", d)
-	default:
-		res.source = "MAC 地址表为空 (SNMP 视图可能未放通 bridge MIB)"
-	}
-
-	// 把 (mac -> 端口集合) 落定成有序切片, 并给出一个朴素的默认解
-	// (按端口名排序取第一个), 好让没走 resolveFDB() 的老代码路径/测试
-	// 仍然有个可用的 macToIf。inspectDevice 里拿到 LLDP 之后会调用
-	// resolveFDB() 覆盖成更准确的选择(优先选接入口而不是上联口)。
-	for mac, set := range locSet {
-		ports := make([]string, 0, len(set))
-		for p := range set {
-			ports = append(ports, p)
-		}
-		sort.Strings(ports)
-		res.macLocations[mac] = ports
-		res.macToIf[mac] = ports[0]
-		res.portMACs[ports[0]]++
-	}
-	for mac, vlans := range macVlanSet {
-		if len(vlans) == 1 {
-			for vlan := range vlans {
-				res.macVlan[mac] = vlan
-			}
-		}
-	}
-	for mac, locations := range legacyLocSet {
-		if qMACs[mac] {
-			continue // Q-BRIDGE 已有精确 VLAN 行，不再用无 VLAN 的 BRIDGE 行重复计数
-		}
-		rowLocSet[fdbRowKey{mac: mac, vlan: "-"}] = locations
-	}
-	for key, set := range rowLocSet {
-		locations := make([]string, 0, len(set))
-		for ifIdx := range set {
-			locations = append(locations, ifIdx)
-		}
-		sort.Strings(locations)
-		res.fdbRows = append(res.fdbRows, fdbRow{MAC: key.mac, VlanID: key.vlan, Locations: locations})
-	}
-	sort.Slice(res.fdbRows, func(i, j int) bool {
-		if res.fdbRows[i].VlanID != res.fdbRows[j].VlanID {
-			return naturalLess(res.fdbRows[i].VlanID, res.fdbRows[j].VlanID)
-		}
-		return res.fdbRows[i].MAC < res.fdbRows[j].MAC
-	})
-	return res
+	return b
 }
 
-type fdbRowKey struct {
-	mac  string
-	vlan string
-}
-
-// resolveFDB 在 LLDP 和端口角色都已知的情况下, 对每个"在多个端口都学到过"
-// 的 MAC 做最终裁决: 优先选非上联口(更可能是真实接入点), 多个候选都不是
-// 上联口时选学到 MAC 数最少的那个(更"专一", 更像是专属接入口); 全部候选
-// 都是上联口时说明这台终端是通过冗余链路间接可见, 保留 MAC 数最多的上联口
-// (最可能是当前的主用链路), 并标记为有歧义, 在 MAC 总表里如实呈现。
-func resolveFDB(fdb fdbResult, ifs map[string]*ifInfo, lldp map[string]lldpNeighbor, uplinkThreshold int) (macToIf map[string]string, portMACs map[string]int, ambiguous map[string]bool) {
-	macToIf = make(map[string]string, len(fdb.macLocations))
-	portMACs = make(map[string]int)
-	ambiguous = make(map[string]bool)
-
-	isUplink := func(ifIdx string) bool {
-		return fdb.portMACs[ifIdx] >= uplinkThreshold || lldp[ifIdx].Dev != ""
-	}
-
-	for mac, locs := range fdb.macLocations {
-		if len(locs) == 1 {
-			macToIf[mac] = locs[0]
-			portMACs[locs[0]]++
-			continue
-		}
-		ambiguous[mac] = true
-
-		var access, uplink []string
-		for _, l := range locs {
-			if isUplink(l) {
-				uplink = append(uplink, l)
-			} else {
-				access = append(access, l)
-			}
-		}
-		pick := func(cands []string, minimize bool) string {
-			best := cands[0]
-			for _, c := range cands[1:] {
-				if minimize && fdb.portMACs[c] < fdb.portMACs[best] {
-					best = c
-				} else if !minimize && fdb.portMACs[c] > fdb.portMACs[best] {
-					best = c
-				}
-			}
-			return best
-		}
-		var chosen string
-		if len(access) > 0 {
-			chosen = pick(access, true) // 多个接入候选: 选最"专一"的
-		} else {
-			chosen = pick(uplink, false) // 全是上联: 选当前承载流量最大的那条
-		}
-		macToIf[mac] = chosen
-		portMACs[chosen]++
-	}
-	// portMACs 需要覆盖所有在 ifs 里出现过、哪怕这一轮没有歧义 mac 落在
-	// 上面的端口(0 也是有效信息), 但 map 默认零值已经等价于 0, 不用补。
-	_ = ifs
-	return
-}
-
-// vlanFromIfaceName 从三层 SVI 接口名里抠出 VLAN 号, 覆盖各厂商的常见写法:
-// "Vlan10" / "Vlan-interface10" (H3C) / "Vlanif10" (华为) / "VLAN 10" (锐捷)。
-var vlanNameRe = regexp.MustCompile(`(?i)^vlan[-_ ]?(?:interface|if)?[-_ ]?0*(\d{1,4})$`)
-
-func vlanFromIfaceName(name string) string {
-	m := vlanNameRe.FindStringSubmatch(strings.TrimSpace(name))
-	if len(m) == 2 {
-		return m[1]
-	}
-	return ""
-}
-
-// resolveVlanCommunity 用 "community@vlanID" 风格的团体名(常见于要求
-// per-VLAN 视图才能看到完整 MAC 表的设备)单独查一次 dot1dTpFdbTable,
-// 把结果合并进主 FDB。只在配置了 vlan_community_format 且确实还有
-// "未定位"记录时才会用到, 按 VLAN 去重, 不会放大成每个终端一次查询。
-func resolveVlanCommunity(target DeviceTarget, cfg *Config, format, vlanID string, r *indexResolver) map[string]string {
-	out := map[string]string{}
-	if format == "" || vlanID == "" || !strings.Contains(format, "%s") {
-		return out
-	}
-	vt := target
-	vt.Community = fmt.Sprintf(format, target.Community, vlanID)
-
-	s, err := dialSNMP(vt, cfg)
-	if err != nil {
-		return out
-	}
-	defer func() {
-		if s.c.Conn != nil {
-			_ = s.c.Conn.Close()
-		}
-	}()
-
+func walkBridgePorts(s *snmpSession, r *indexResolver) map[string]string {
 	bridgeToIf := make(map[string]string)
 	for bport, v := range s.walkInts(oidDot1dBasePortIfIndex) {
 		ifIdx := strconv.FormatInt(v, 10)
@@ -869,25 +671,118 @@ func resolveVlanCommunity(target DeviceTarget, cfg *Config, format, vlanID strin
 			bridgeToIf[bport] = ifIdx
 		}
 	}
-	status := s.walkInts(oidDot1dTpFdbStatus)
-	_ = s.walk(oidDot1dTpFdbPort, func(idx string, pdu gosnmp.SnmpPDU) {
-		parts := strings.Split(idx, ".")
-		if len(parts) != 6 {
-			return
+	return bridgeToIf
+}
+
+// collectFDB 是一次性读完并落定的简便写法。
+func collectFDB(s *snmpSession, r *indexResolver) fdbResult {
+	return collectFDBRaw(s, r).finish()
+}
+
+var vlanNameRe = regexp.MustCompile(`(?i)^vlan[-_ ]?(?:interface|if)?[-_ ]?0*(\d{1,4})$`)
+
+// maxCommunityVlans: 按 VLAN 团体名补采时最多查多少个 VLAN, 每个 VLAN 一次独立的 walk。
+const maxCommunityVlans = 256
+
+// collectFDBPerVlan 用 "community@vlanID" 风格的团体名(Cisco 等设备要求 per-VLAN 上下文
+// 才能看到该 VLAN 的 MAC 表)逐个 VLAN 读 dot1dTpFdbTable, 带上 VLAN 号合并进 builder。
+//
+// 以前只对"ARP 里还没定位到端口"的 VLAN 补查, 查到的结果也只用来回填 ARP 表,
+// MAC 表 / MAC 转发表里根本没有这些行; 而且补查发生在 MAC 表生成之后, 还直接改了
+// 上一轮缓存里的 map。现在在大表采集阶段对全部已知 VLAN 补采, 跟普通转发表行一起落定。
+func collectFDBPerVlan(target DeviceTarget, cfg *Config, format string, vlans []string, r *indexResolver, b *fdbBuilder) {
+	if format == "" || !strings.Contains(format, "%s") || len(vlans) == 0 {
+		return
+	}
+	total := len(vlans)
+	if total > maxCommunityVlans {
+		vlans = vlans[:maxCommunityVlans]
+	}
+	failed := 0
+	for _, vlanID := range vlans {
+		vt := target
+		vt.Community = fmt.Sprintf(format, target.Community, vlanID)
+		s, err := dialSNMP(vt, cfg)
+		if err != nil {
+			failed++
+			continue
 		}
-		if st, ok := status[idx]; ok && st != 3 {
-			return
+		bridgeToIf := walkBridgePorts(s, r)
+		status := s.walkInts(oidDot1dTpFdbStatus)
+		err = s.walk(oidDot1dTpFdbPort, func(idx string, pdu gosnmp.SnmpPDU) {
+			parts := strings.Split(idx, ".")
+			if len(parts) != 6 {
+				return
+			}
+			if st, ok := status[idx]; !fdbStatusUsable(st, ok) {
+				return
+			}
+			bport := strconv.FormatInt(toInt64(pdu.Value), 10)
+			if bport == "0" {
+				return
+			}
+			if b.add(macFromOIDDigits(parts), vlanID, resolveBridgePortIfIndex(bport, bridgeToIf, r)) {
+				b.nVlan++
+			}
+		})
+		if err != nil {
+			failed++
 		}
-		bport := strconv.FormatInt(toInt64(pdu.Value), 10)
-		ifIdx := resolveBridgePortIfIndex(bport, bridgeToIf, r)
-		if ifIdx == "" {
-			return
+		if s.c.Conn != nil {
+			_ = s.c.Conn.Close()
 		}
-		if mac := macFromOIDDigits(parts); mac != "" {
-			out[mac] = ifIdx
+	}
+	b.vlanNote = fmt.Sprintf("按 VLAN 团体名查了 %d 个 VLAN", len(vlans))
+	if total > len(vlans) {
+		b.vlanNote += fmt.Sprintf("(共 %d 个, 超过上限 %d 的没查)", total, maxCommunityVlans)
+	}
+	if failed > 0 {
+		b.vlanNote += fmt.Sprintf(", %d 个失败", failed)
+	}
+}
+
+// knownVlans 汇总设备上能看到的 VLAN 号: 端口 VLAN 成员关系、VLAN 名称表、VLANIF 接口名。
+func knownVlans(pl portLayerInfo, ifs map[string]*ifInfo) []string {
+	set := map[int]bool{}
+	for _, vi := range pl.vlans {
+		if vi == nil {
+			continue
 		}
-	})
-	return out
+		if vi.native > 0 {
+			set[vi.native] = true
+		}
+		for _, v := range vi.tagged {
+			set[v] = true
+		}
+		for _, v := range vi.untagged {
+			set[v] = true
+		}
+	}
+	for v := range pl.vlanNames {
+		set[v] = true
+	}
+	for _, v := range pl.vlan {
+		if n, err := strconv.Atoi(v); err == nil {
+			set[n] = true
+		}
+	}
+	for _, e := range ifs {
+		if n, err := strconv.Atoi(vlanFromIfaceName(e.display())); err == nil {
+			set[n] = true
+		}
+	}
+	out := make([]int, 0, len(set))
+	for v := range set {
+		if v >= 1 && v <= 4094 && (v < 1002 || v > 1005) { // 1002-1005: Cisco 保留的 FDDI/令牌环 VLAN
+			out = append(out, v)
+		}
+	}
+	sort.Ints(out)
+	res := make([]string, len(out))
+	for i, v := range out {
+		res[i] = strconv.Itoa(v)
+	}
+	return res
 }
 
 // ----------------- ARP -----------------
@@ -903,10 +798,7 @@ func collectARP(s *snmpSession) []arpEntry {
 	var out []arpEntry
 
 	push := func(ifIdx, ip, mac string) {
-		if ip == "" || mac == "" || mac == "00:00:00:00:00:00" {
-			return
-		}
-		if strings.HasPrefix(ip, "127.") || strings.HasPrefix(ip, "0.") || strings.HasSuffix(ip, ".255") {
+		if !arpAccept(ip, mac) {
 			return
 		}
 		key := ip + "/" + mac
@@ -917,22 +809,25 @@ func collectARP(s *snmpSession) []arpEntry {
 		out = append(out, arpEntry{IP: ip, MAC: mac, IfIndex: ifIdx})
 	}
 
-	// ipNetToMediaPhysAddress: 索引 = ifIndex . a.b.c.d
+	// ipNetToMediaPhysAddress: 索引 = ifIndex . a.b.c.d; ipNetToMediaType=invalid(2) 的是已失效的行
+	mediaType := s.walkInts(oidIpNetToMediaType)
 	_ = s.walk(oidIpNetToMediaPhysAddr, func(idx string, pdu gosnmp.SnmpPDU) {
 		parts := strings.Split(idx, ".")
-		if len(parts) != 5 {
+		if len(parts) != 5 || mediaType[idx] == 2 {
 			return
 		}
 		push(parts[0], strings.Join(parts[1:], "."), formatMACValue(pdu.Value))
 	})
 
 	// ipNetToPhysicalPhysAddress: 索引 = ifIndex . addrType . len . a.b.c.d
+	physType := s.walkInts(oidIpNetToPhysicalType)
 	_ = s.walk(oidIpNetToPhysicalPhysAd, func(idx string, pdu gosnmp.SnmpPDU) {
-		parts := strings.Split(idx, ".")
-		if len(parts) != 7 || parts[1] != "1" || parts[2] != "4" {
-			return // 只取 IPv4
+		if physType[idx] == 2 {
+			return
 		}
-		push(parts[0], strings.Join(parts[3:], "."), formatMACValue(pdu.Value))
+		if ifIdx, ip, ok := arpIndexIPv4(idx); ok {
+			push(ifIdx, ip, formatMACValue(pdu.Value))
+		}
 	})
 
 	sort.Slice(out, func(i, j int) bool { return ipLess(out[i].IP, out[j].IP) })

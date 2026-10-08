@@ -49,10 +49,15 @@ const (
 	oidDot1dTpFdbStatus     = ".1.3.6.1.2.1.17.4.3.1.3"
 	oidDot1qTpFdbPort       = ".1.3.6.1.2.1.17.7.1.2.2.1.2"
 	oidDot1qTpFdbStatus     = ".1.3.6.1.2.1.17.7.1.2.2.1.3"
+	// dot1qVlanFdbId: 索引 timeMark.vlanId, 值 = 这个 VLAN 用的过滤数据库号(FdbId)。
+	// dot1qTpFdbTable 的第一段索引是 FdbId 而不是 VLAN 号, 两者不相等的设备要靠它换算。
+	oidDot1qVlanFdbId = ".1.3.6.1.2.1.17.7.1.4.2.1.3"
 
 	// 三层 ARP
 	oidIpNetToMediaPhysAddr  = ".1.3.6.1.2.1.4.22.1.2"
 	oidIpNetToPhysicalPhysAd = ".1.3.6.1.2.1.4.35.1.4"
+	oidIpNetToMediaType      = ".1.3.6.1.2.1.4.22.1.4" // 2 = invalid(已失效, 应当忽略)
+	oidIpNetToPhysicalType   = ".1.3.6.1.2.1.4.35.1.6" // 同上
 
 	// 标准 IP-FORWARD-MIB 路由表。优先读支持 IPv4/IPv6 的 inetCidrRouteTable，
 	// 再回退到 IPv4 ipCidrRouteTable 和旧版 ipRouteTable。

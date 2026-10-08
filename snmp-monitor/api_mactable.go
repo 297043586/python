@@ -69,23 +69,13 @@ func globalMACEntries(reports []DeviceReport) []globalMACEntry {
 func globalMACEntriesCtx(reports []DeviceReport, nc *netCtx) []globalMACEntry {
 	// 全网 ARP/host_mappings 汇总出 MAC -> 终端 IP 的映射, 用来给 MAC 总表
 	// 补上一列"这个 MAC 到底是谁"——单看 MAC 表本身只知道端口, 不知道 IP。
-	macToIP := make(map[string]string, 1024)
-	for _, rep := range reports {
-		for _, h := range rep.HostMappings {
-			if h.MAC == "" || h.IP == "" {
-				continue
-			}
-			if _, exists := macToIP[h.MAC]; !exists {
-				macToIP[h.MAC] = h.IP
-			}
-		}
-	}
+	macToIP := macIPIndex(reports)
 
 	byMAC := make(map[string][]globalMACEntry, 1024)
 	for _, rep := range reports {
 		for _, m := range rep.MACTable {
 			e := globalMACEntry{
-				DeviceIP: rep.IP, DeviceName: rep.SysName, MAC: m.MAC, HostIP: macToIP[m.MAC], VlanID: m.VlanID,
+				DeviceIP: rep.IP, DeviceName: rep.SysName, MAC: m.MAC, HostIP: macToIP[strings.ToUpper(m.MAC)], VlanID: m.VlanID,
 				Port: m.Port, PortKind: m.PortKind, IsUplink: m.IsUplink,
 				Ambiguous: m.Ambiguous, Locations: m.Locations,
 			}
@@ -211,6 +201,32 @@ func globalMACEntriesCtx(reports []DeviceReport, nc *netCtx) []globalMACEntry {
 		}
 		return out[i].DeviceIP < out[j].DeviceIP
 	})
+	return out
+}
+
+// macIPIndex: MAC -> 终端 IP。一个 MAC 有多个 IP 时只取设备自己 ARP 解析到的(不取跨设备
+// 关联借来的)、地址最小的那个, 结果跟设备巡检顺序无关; 以前取"第一台设备报的第一条",
+// 每轮刷新可能换一个 IP。
+func macIPIndex(reports []DeviceReport) map[string]string {
+	out := make(map[string]string, 1024)
+	relayed := map[string]bool{}
+	for _, rep := range reports {
+		for _, h := range rep.HostMappings {
+			if h.MAC == "" || h.IP == "" {
+				continue
+			}
+			mac := strings.ToUpper(h.MAC)
+			cur, exists := out[mac]
+			isRelayed := h.IPSource != ""
+			switch {
+			case !exists,
+				!isRelayed && relayed[mac],                     // 本机解析的替换关联来的
+				isRelayed == relayed[mac] && ipLess(h.IP, cur): // 同一类里取地址小的
+				out[mac] = h.IP
+				relayed[mac] = isRelayed
+			}
+		}
+	}
 	return out
 }
 

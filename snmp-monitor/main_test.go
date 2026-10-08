@@ -540,7 +540,7 @@ func TestResolveFDBPrefersAccessOverUplink(t *testing.T) {
 		"49": {Dev: "CORE", Port: "Gi0/1"},
 		"50": {Dev: "CORE2", Port: "Gi0/2"},
 	}
-	macToIf, _, ambiguous := resolveFDB(fdb, ifs, lldp, 8)
+	macToIf, ambiguous := resolveFDB(fdb, uplinkPortSet(ifs, lldp, nil), 8)
 
 	if macToIf["AA:AA:AA:AA:AA:AA"] != "1" {
 		t.Errorf("单一位置应直接采用, 实际 %q", macToIf["AA:AA:AA:AA:AA:AA"])
